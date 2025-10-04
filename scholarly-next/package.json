@@ -13,6 +13,7 @@
     "lucide-react": "^0.544.0",
     "next": "15.5.4",
     "next-auth": "^4.24.11",
+    "pdfjs-dist": "^5.4.149",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

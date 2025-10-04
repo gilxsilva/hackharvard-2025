@@ -1,0 +1,30 @@
+CS 101 - Introduction to Programming
+Spring 2025
+Dr. Sarah Johnson
+
+Course Schedule:
+Classes meet Monday, Wednesday, Friday at 10:00 AM - 11:00 AM
+Location: Science Building Room 201
+
+Important Dates:
+
+Week 1 (Jan 15-17):
+- 01/15/2025: First Day of Class - Introduction to Programming
+- 01/17/2025: Variables and Data Types
+
+Week 2 (Jan 20-24):
+- 01/22/2025: Control Flow and Loops
+- 01/24/2025: Functions and Methods
+
+Assignment Deadlines:
+- 02/01/2025 11:59 PM: Assignment 1 Due - Basic Programming Exercises
+- 02/15/2025 11:59 PM: Assignment 2 Due - Functions and Algorithms
+- 03/01/2025 11:59 PM: Midterm Project Due
+
+Exams:
+- 03/15/2025 10:00 AM - 12:00 PM: Midterm Exam (Science Building Room 201)
+- 05/10/2025 2:00 PM - 4:00 PM: Final Exam (Science Building Room 201)
+
+Office Hours:
+Tuesdays and Thursdays 2:00 PM - 4:00 PM
+Location: CS Department, Office 305
