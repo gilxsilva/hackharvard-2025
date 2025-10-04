@@ -1,5 +1,6 @@
 import { useAuth } from './hooks/useAuth';
 import Dashboard from './pages/Dashboard';
+import Calendar from './pages/Calendar';
 import LoginButton from './components/LoginButton';
 
 function App() {
@@ -7,6 +8,9 @@ function App() {
   const BYPASS_AUTH = true;
   
   const { user, loading } = useAuth();
+
+  // Simple routing based on URL path
+  const currentPath = window.location.pathname;
 
   if (loading && !BYPASS_AUTH) {
     return (
@@ -19,12 +23,23 @@ function App() {
     );
   }
 
-  // Show dashboard directly when bypassing auth
+  // Route to different pages
+  const renderPage = () => {
+    switch (currentPath) {
+      case '/calendar':
+        return <Calendar />;
+      case '/':
+      default:
+        return <Dashboard />;
+    }
+  };
+
+  // Show appropriate page when bypassing auth
   if (BYPASS_AUTH) {
-    return <Dashboard />;
+    return renderPage();
   }
 
-  return user ? <Dashboard /> : <LoginButton />;
+  return user ? renderPage() : <LoginButton />;
 }
 
 export default App;
