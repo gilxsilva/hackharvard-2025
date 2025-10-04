@@ -14,6 +14,38 @@ export interface CanvasCourse {
     course_code: string;
 }
 
+export interface CanvasSubmission {
+    id: number;
+    assignment_id: number;
+    user_id: number;
+    grade: string | null;
+    score: number | null;
+    points_deducted?: number;
+    late?: boolean;
+    missing?: boolean;
+    submitted_at: string | null;
+    graded_at: string | null;
+}
+
+export interface CanvasGrade {
+    assignment: CanvasAssignment;
+    submission: CanvasSubmission;
+    course_name: string;
+    course_code: string;
+}
+
+export interface CanvasCourseGrade {
+    course_id: number;
+    course_name: string;
+    course_code: string;
+    current_grade: string | null;
+    current_score: number | null;
+    final_grade: string | null;
+    final_score: number | null;
+    unposted_current_score: number | null;
+    unposted_final_score: number | null;
+}
+
 // Fetch user's active courses
 export const fetchCanvasCourses = async (): Promise<CanvasCourse[]> => {
     console.log('🔍 Fetching courses from Canvas...');
@@ -69,6 +101,76 @@ export const fetchUpcomingAssignments = async () => {
         return upcomingAssignments;
     } catch (error) {
         console.error('Error fetching Canvas assignments:', error);
+        throw error;
+    }
+};
+
+// Fetch grades for a specific course
+export const fetchCourseGrades = async (courseId: number): Promise<CanvasGrade[]> => {
+    console.log(`🎯 Fetching grades for course ID: ${courseId}`);
+    const response = await fetch(`/api/canvas/courses/${courseId}/grades`);
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Canvas API error: ${response.status} ${errorData.error || response.statusText}`);
+    }
+
+    const grades = await response.json();
+    console.log(`📊 Course ${courseId} grades:`, grades.length, 'graded assignments');
+
+    return grades;
+};
+
+// Fetch all grades across all courses
+export const fetchAllGrades = async (): Promise<CanvasGrade[]> => {
+    try {
+        console.log('🎯 Starting to fetch all grades...');
+        const response = await fetch('/api/canvas/grades');
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Canvas API error: ${response.status} ${errorData.error || response.statusText}`);
+        }
+
+        const grades = await response.json();
+
+        console.log(`📊 Retrieved ${grades.length} graded assignments`);
+        console.log('📋 Recent grades:');
+        grades.slice(0, 5).forEach((grade: any, index: number) => {
+            console.log(`  ${index + 1}. ${grade.assignment.name} (${grade.course_name}) - Grade: ${grade.submission.grade} (${grade.submission.score}/${grade.assignment.points_possible})`);
+        });
+
+        return grades;
+    } catch (error) {
+        console.error('Error fetching Canvas grades:', error);
+        throw error;
+    }
+};
+
+// Fetch overall course grades (final grades for each course)
+export const fetchOverallCourseGrades = async (): Promise<CanvasCourseGrade[]> => {
+    try {
+        console.log('🎓 Starting to fetch course grades...');
+        const response = await fetch('/api/canvas/course-grades');
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Canvas API error: ${response.status} ${errorData.error || response.statusText}`);
+        }
+
+        const courseGrades = await response.json();
+
+        console.log(`📊 Retrieved ${courseGrades.length} course grades`);
+        console.log('📋 Course grades:');
+        courseGrades.slice(0, 5).forEach((grade: CanvasCourseGrade, index: number) => {
+            const displayGrade = grade.current_grade || grade.final_grade || 'No Grade';
+            const displayScore = grade.current_score || grade.final_score || 'No Score';
+            console.log(`  ${index + 1}. ${grade.course_code} (${grade.course_name}) - Grade: ${displayGrade} (${displayScore}%)`);
+        });
+
+        return courseGrades;
+    } catch (error) {
+        console.error('Error fetching Canvas course grades:', error);
         throw error;
     }
 };
