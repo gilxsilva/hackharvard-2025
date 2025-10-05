@@ -3,11 +3,19 @@
 import { Award, BookOpen, Calendar as CalendarIcon, BarChart3 } from 'lucide-react';
 import DashboardCanvas from '@/components/dashboard/DashboardCanvas';
 import Widget from '@/components/dashboard/Widget';
+import LaunchSequence from '@/components/intro/LaunchSequence';
 import { ZoomProvider, useZoomContext } from '@/contexts/ZoomContext';
+import { NavigationProvider } from '@/contexts/NavigationContext';
 
 // Import existing widget components
 import { useState, useEffect } from 'react';
 import { fetchUpcomingAssignments, fetchCanvasCourses, fetchOverallCourseGrades, type CanvasAssignment, type CanvasCourse, type CanvasCourseGrade } from '@/lib/canvasApi';
+import { useGridSnap } from '@/hooks/useGridSnap';
+import { applyLayout, type LayoutMode, type WidgetPosition } from '@/utils/layoutAlgorithms';
+import GridOverlay from '@/components/grid/GridOverlay';
+import GridController from '@/components/grid/GridController';
+import type { Position } from '@/hooks/useDragAndDrop';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 // Mock data
 const mockAssignments = [
@@ -214,6 +222,11 @@ function StatsWidgetContent() {
 // Main Dashboard Component
 function SpaceDashboardContent() {
   const { toggleZoom, isFocused } = useZoomContext();
+  const { config, snapToGrid, toggleGridSnap, toggleGuides, isEnabled, showGuides } = useGridSnap(false);
+  const [currentLayout, setCurrentLayout] = useState<LayoutMode>('orbital');
+  const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
+
+  const widgetIds = ['courses', 'assignments', 'grades', 'stats'];
 
   // Calculate orbital positions (responsive)
   const getPosition = (index: number, total: number = 4) => {
@@ -228,16 +241,74 @@ function SpaceDashboardContent() {
     };
   };
 
+  // Initialize widget positions
+  useEffect(() => {
+    const initialPositions: Record<string, Position> = {};
+    widgetIds.forEach((id, index) => {
+      initialPositions[id] = getPosition(index);
+    });
+    setWidgetPositions(initialPositions);
+  }, []);
+
+  // Auto-arrange function
+  const handleAutoArrange = () => {
+    if (typeof window === 'undefined') return;
+
+    const layoutParams = {
+      centerX: window.innerWidth / 2,
+      centerY: window.innerHeight / 2,
+      widgetWidth: 380,
+      widgetHeight: 420
+    };
+
+    const newPositions = applyLayout(widgetIds, currentLayout, layoutParams);
+    const positionsMap: Record<string, Position> = {};
+    newPositions.forEach(pos => {
+      positionsMap[pos.id] = { x: pos.x, y: pos.y };
+    });
+    setWidgetPositions(positionsMap);
+  };
+
+  // Handle position change for individual widgets
+  const handlePositionChange = (id: string, position: Position) => {
+    setWidgetPositions(prev => ({ ...prev, [id]: position }));
+  };
+
+  // Keyboard shortcut for toggling grid snap
+  useKeyboardShortcuts([
+    {
+      key: 'g',
+      action: toggleGridSnap,
+      description: 'Toggle grid snap mode'
+    }
+  ]);
+
   return (
     <>
+      {/* Grid Overlay */}
+      <GridOverlay cellSize={config.cellSize} isVisible={showGuides} />
+
+      {/* Grid Controller */}
+      <GridController
+        isGridEnabled={isEnabled}
+        showGuides={showGuides}
+        currentLayout={currentLayout}
+        onToggleGrid={toggleGridSnap}
+        onToggleGuides={toggleGuides}
+        onChangeLayout={setCurrentLayout}
+        onAutoArrange={handleAutoArrange}
+      />
+
       <Widget
         id="courses"
         title="My Courses"
         icon={<BookOpen className="w-5 h-5" />}
-        initialPosition={getPosition(0)}
+        initialPosition={widgetPositions['courses'] || getPosition(0)}
         glowColor="green"
         isZoomed={isFocused('courses')}
         onDoubleClick={() => toggleZoom('courses')}
+        onPositionChange={(pos) => handlePositionChange('courses', pos)}
+        snapFunction={isEnabled ? snapToGrid : undefined}
       >
         <CoursesWidgetContent />
       </Widget>
@@ -246,10 +317,12 @@ function SpaceDashboardContent() {
         id="assignments"
         title="Upcoming Assignments"
         icon={<CalendarIcon className="w-5 h-5" />}
-        initialPosition={getPosition(1)}
+        initialPosition={widgetPositions['assignments'] || getPosition(1)}
         glowColor="blue"
         isZoomed={isFocused('assignments')}
         onDoubleClick={() => toggleZoom('assignments')}
+        onPositionChange={(pos) => handlePositionChange('assignments', pos)}
+        snapFunction={isEnabled ? snapToGrid : undefined}
       >
         <AssignmentsWidgetContent />
       </Widget>
@@ -258,10 +331,12 @@ function SpaceDashboardContent() {
         id="grades"
         title="Course Grades"
         icon={<Award className="w-5 h-5" />}
-        initialPosition={getPosition(2)}
+        initialPosition={widgetPositions['grades'] || getPosition(2)}
         glowColor="purple"
         isZoomed={isFocused('grades')}
         onDoubleClick={() => toggleZoom('grades')}
+        onPositionChange={(pos) => handlePositionChange('grades', pos)}
+        snapFunction={isEnabled ? snapToGrid : undefined}
       >
         <GradesWidgetContent />
       </Widget>
@@ -270,10 +345,12 @@ function SpaceDashboardContent() {
         id="stats"
         title="Weekly Overview"
         icon={<BarChart3 className="w-5 h-5" />}
-        initialPosition={getPosition(3)}
+        initialPosition={widgetPositions['stats'] || getPosition(3)}
         glowColor="purple"
         isZoomed={isFocused('stats')}
         onDoubleClick={() => toggleZoom('stats')}
+        onPositionChange={(pos) => handlePositionChange('stats', pos)}
+        snapFunction={isEnabled ? snapToGrid : undefined}
       >
         <StatsWidgetContent />
       </Widget>
@@ -283,10 +360,14 @@ function SpaceDashboardContent() {
 
 export default function SpaceDashboardPage() {
   return (
-    <ZoomProvider>
-      <DashboardCanvas>
-        <SpaceDashboardContent />
-      </DashboardCanvas>
-    </ZoomProvider>
+    <LaunchSequence enabled={true}>
+      <NavigationProvider>
+        <ZoomProvider>
+          <DashboardCanvas>
+            <SpaceDashboardContent />
+          </DashboardCanvas>
+        </ZoomProvider>
+      </NavigationProvider>
+    </LaunchSequence>
   );
 }

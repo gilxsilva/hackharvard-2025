@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, ReactNode } from 'react';
-import { useDragAndDrop, Position } from '@/hooks/useDragAndDrop';
+import { useDragAndDrop, Position, SnapFunction } from '@/hooks/useDragAndDrop';
 
 export interface WidgetProps {
   id: string;
@@ -13,6 +13,8 @@ export interface WidgetProps {
   isZoomed?: boolean;
   isDraggable?: boolean;
   onDoubleClick?: () => void;
+  onPositionChange?: (position: Position) => void;
+  snapFunction?: SnapFunction;
   className?: string;
 }
 
@@ -26,10 +28,19 @@ export default function Widget({
   isZoomed = false,
   isDraggable = true,
   onDoubleClick,
+  onPositionChange,
+  snapFunction,
   className = ''
 }: WidgetProps) {
-  const { position, isDragging, handleMouseDown, handleMouseMove, handleMouseUp } = useDragAndDrop(initialPosition);
+  const { position, isDragging, handleMouseDown, handleMouseMove, handleMouseUp, setPosition } = useDragAndDrop(initialPosition, snapFunction);
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  // Notify parent of position changes
+  useEffect(() => {
+    if (onPositionChange) {
+      onPositionChange(position);
+    }
+  }, [position, onPositionChange]);
 
   // Handle global mouse events for dragging
   useEffect(() => {

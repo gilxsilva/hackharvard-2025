@@ -1,33 +1,59 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import SpaceBackground from './SpaceBackground';
 import CentralHub from './CentralHub';
+import CommandBar from '../navigation/CommandBar';
+import CommandPalette from '../navigation/CommandPalette';
+import QuickActionsOrb from '../navigation/QuickActionsOrb';
 import { useZoom } from '@/hooks/useZoom';
+import { useNavigation } from '@/contexts/NavigationContext';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface DashboardCanvasProps {
   children: ReactNode;
 }
 
 export default function DashboardCanvas({ children }: DashboardCanvasProps) {
-  const { zoomState, focusedWidgetId } = useZoom();
+  const { zoomState } = useZoom();
+  const {
+    isCommandPaletteOpen,
+    openCommandPalette,
+    closeCommandPalette,
+    openSettings,
+    openWidgetManager,
+    toggleCalendar,
+    openHelp
+  } = useNavigation();
 
-  // Handle ESC key to zoom out
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && zoomState === 'focused') {
-        // Trigger zoom out through parent context if needed
-      }
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [zoomState]);
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'k',
+      meta: true,
+      action: openCommandPalette,
+      description: 'Open command palette'
+    }
+  ]);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden" style={{ background: '#0a0a14' }}>
       {/* Space Background */}
       <SpaceBackground />
+
+      {/* Command Bar */}
+      <CommandBar
+        onOpenSettings={openSettings}
+        onOpenWidgetManager={openWidgetManager}
+        onToggleCalendar={toggleCalendar}
+        onOpenHelp={openHelp}
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={closeCommandPalette}
+      />
 
       {/* Central AI Hub */}
       <CentralHub />
@@ -36,6 +62,15 @@ export default function DashboardCanvas({ children }: DashboardCanvasProps) {
       <div className="relative w-full h-full">
         {children}
       </div>
+
+      {/* Quick Actions Orb */}
+      <QuickActionsOrb
+        isVisible={zoomState === 'overview'}
+        onAddWidget={openWidgetManager}
+        onArrangeGrid={() => console.log('Arrange grid')}
+        onResetLayout={() => console.log('Reset layout')}
+        onExportData={() => console.log('Export data')}
+      />
 
       {/* Zoom Overlay */}
       {zoomState === 'focused' && (
@@ -55,7 +90,7 @@ export default function DashboardCanvas({ children }: DashboardCanvasProps) {
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 rounded-full bg-green-400" />
-            <span className="text-xs text-white/70">Click center for AI</span>
+            <span className="text-xs text-white/70">Press ⌘K for commands</span>
           </div>
         </div>
       )}

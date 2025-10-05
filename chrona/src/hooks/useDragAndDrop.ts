@@ -11,7 +11,14 @@ export interface DragState {
   offset: Position;
 }
 
-export function useDragAndDrop(initialPosition: Position) {
+export interface SnapFunction {
+  (position: Position): Position;
+}
+
+export function useDragAndDrop(
+  initialPosition: Position,
+  snapFunction?: SnapFunction
+) {
   const [position, setPosition] = useState<Position>(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef<Position>({ x: 0, y: 0 });
@@ -59,9 +66,15 @@ export function useDragAndDrop(initialPosition: Position) {
     if (!isDragging) return;
     setIsDragging(false);
 
+    // Apply snap function on mouse release
+    if (snapFunction) {
+      const snappedPosition = snapFunction(position);
+      setPosition(snappedPosition);
+    }
+
     // Apply momentum (optional)
     // You can add physics-based easing here if desired
-  }, [isDragging]);
+  }, [isDragging, snapFunction, position]);
 
   return {
     position,
