@@ -6,17 +6,17 @@ Chrona helps students manage their coursework through AI-powered automation - fr
 
 ## Project Structure
 
-- [`scholarly-next/`](./scholarly-next/) - Main Next.js application
+- [`chrona/`](./chrona/) - Main Next.js application
 
 ## Quick Start
 
 ```bash
-cd scholarly-next
+cd chrona
 npm install
 npm run dev
 ```
 
-See the [full README](./scholarly-next/README.md) for detailed setup instructions.
+See the [full README](./chrona/README.md) for detailed setup instructions.
 
 ## Features
 
