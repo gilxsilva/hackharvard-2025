@@ -10,7 +10,7 @@ interface GridControllerProps {
   onToggleGrid: () => void;
   onToggleGuides: () => void;
   onChangeLayout: (layout: LayoutMode) => void;
-  onAutoArrange: () => void;
+  onAutoArrange: (layout?: LayoutMode) => void;
 }
 
 export default function GridController({
@@ -31,44 +31,6 @@ export default function GridController({
 
   return (
     <div className="fixed bottom-24 right-6 z-40 flex flex-col items-end space-y-3">
-      {/* Grid Snap Toggle */}
-      <button
-        onClick={onToggleGrid}
-        className={`px-4 py-2 rounded-lg backdrop-blur-xl border transition-all duration-300 ${
-          isGridEnabled
-            ? 'bg-purple-500/20 border-purple-500/50 text-purple-300'
-            : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/30'
-        }`}
-        title="Toggle Grid Snap (G)"
-      >
-        <div className="flex items-center space-x-2">
-          <Grid3x3 className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            {isGridEnabled ? 'Snap: ON' : 'Snap: OFF'}
-          </span>
-        </div>
-      </button>
-
-      {/* Show Guides Toggle */}
-      {isGridEnabled && (
-        <button
-          onClick={onToggleGuides}
-          className={`px-4 py-2 rounded-lg backdrop-blur-xl border transition-all duration-300 ${
-            showGuides
-              ? 'bg-blue-500/20 border-blue-500/50 text-blue-300'
-              : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/30'
-          }`}
-          title="Show Grid Guides"
-        >
-          <div className="flex items-center space-x-2">
-            <Grid3x3 className="w-4 h-4" />
-            <span className="text-sm font-medium">
-              {showGuides ? 'Guides: ON' : 'Guides: OFF'}
-            </span>
-          </div>
-        </button>
-      )}
-
       {/* Layout Selector */}
       <div className="bg-white/5 backdrop-blur-xl rounded-lg border border-white/10 p-3">
         <div className="text-xs text-gray-400 mb-2 font-medium">Auto-Arrange</div>
@@ -78,7 +40,8 @@ export default function GridController({
               key={mode}
               onClick={() => {
                 onChangeLayout(mode);
-                onAutoArrange();
+                // Pass the layout mode directly to avoid async state issues
+                onAutoArrange(mode);
               }}
               className={`p-2 rounded-lg border transition-all duration-200 ${
                 currentLayout === mode

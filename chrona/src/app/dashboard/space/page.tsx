@@ -312,6 +312,7 @@ function SpaceDashboardContent() {
     if (typeof window === 'undefined') return;
 
     const layoutToUse = layoutMode || currentLayout;
+    console.log('Auto-arranging with layout:', layoutToUse, 'widgetIds:', widgetIds);
 
     const layoutParams = {
       centerX: window.innerWidth / 2,
@@ -322,6 +323,7 @@ function SpaceDashboardContent() {
 
     // Calculate new positions
     const newPositions = applyLayout(widgetIds, layoutToUse, layoutParams);
+    console.log('New positions calculated:', newPositions);
 
     // Check for overflow
     const bounds = calculateLayoutBounds(newPositions, 380, 420);
@@ -348,6 +350,7 @@ function SpaceDashboardContent() {
       positionsMap[pos.id] = { x: pos.x, y: pos.y };
     });
 
+    console.log('Setting widget positions:', positionsMap);
     setWidgetPositions(positionsMap);
 
     // Update layout memory for this mode

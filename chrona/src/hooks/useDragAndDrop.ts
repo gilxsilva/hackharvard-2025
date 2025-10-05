@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 export interface Position {
   x: number;
@@ -25,6 +25,15 @@ export function useDragAndDrop(
   const velocityRef = useRef<Position>({ x: 0, y: 0 });
   const lastPosRef = useRef<Position>(initialPosition);
   const lastTimeRef = useRef<number>(Date.now());
+
+  // Sync position when initialPosition changes externally (e.g., auto-arrange)
+  // Only update if not currently dragging (to avoid fighting user input)
+  useEffect(() => {
+    if (!isDragging) {
+      setPosition(initialPosition);
+      lastPosRef.current = initialPosition;
+    }
+  }, [initialPosition.x, initialPosition.y, isDragging]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();

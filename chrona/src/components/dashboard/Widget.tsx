@@ -36,6 +36,14 @@ export default function Widget({
   const widgetRef = useRef<HTMLDivElement>(null);
   const prevPositionRef = useRef<Position>(initialPosition);
 
+  // Prevent canvas panning when dragging widget
+  const handleWidgetMouseDown = (e: React.MouseEvent) => {
+    if (isDraggable && !isZoomed) {
+      e.stopPropagation(); // Stop event from reaching TransformWrapper
+      handleMouseDown(e);
+    }
+  };
+
   // Notify parent of position changes only when position actually changes
   useEffect(() => {
     if (onPositionChange &&
@@ -81,7 +89,6 @@ export default function Widget({
       ref={widgetRef}
       className={`
         fixed rounded-2xl backdrop-blur-xl border border-white/10
-        transition-all duration-300 ease-out
         ${isZoomed ? 'inset-0 m-auto max-w-6xl max-h-[90vh] z-50' : ''}
         ${isDragging ? 'scale-105 rotate-1' : 'scale-100'}
         ${isDraggable && !isZoomed ? 'cursor-grab active:cursor-grabbing' : ''}
@@ -98,8 +105,10 @@ export default function Widget({
         minHeight: isZoomed ? '600px' : '420px',
         background: 'rgba(30, 30, 45, 0.8)',
         zIndex: isDragging ? 100 : isZoomed ? 50 : 10,
+        // Smooth transitions for layout changes (but not while dragging)
+        transition: isDragging ? 'none' : 'left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s ease-out',
       }}
-      onMouseDown={isDraggable && !isZoomed ? handleMouseDown : undefined}
+      onMouseDown={handleWidgetMouseDown}
       onDoubleClick={onDoubleClick}
     >
       {/* Header */}
