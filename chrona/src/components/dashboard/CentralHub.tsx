@@ -75,31 +75,38 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
 
   return (
     <>
-      {/* Collapsed Orb */}
+      {/* Collapsed Orb - Bottom Right Corner */}
       {!isExpanded && (
         <div
-          className={`fixed inset-0 m-auto w-32 h-32 z-20 cursor-pointer group ${className}`}
+          className={`fixed bottom-6 right-6 w-16 h-16 z-20 cursor-pointer group ${className}`}
           onClick={() => setIsExpanded(true)}
         >
           {/* Outer glow rings */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse-glow blur-xl" />
-          <div className="absolute inset-2 rounded-full bg-gradient-to-r from-purple-500/30 to-blue-500/30 animate-breathing" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse-glow blur-lg" />
+          <div className="absolute inset-1 rounded-full bg-gradient-to-r from-purple-500/30 to-blue-500/30 animate-breathing" />
 
           {/* Main orb */}
-          <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 shadow-2xl flex items-center justify-center animate-breathing">
-            <Sparkles className="w-12 h-12 text-white animate-pulse" />
+          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 shadow-xl flex items-center justify-center animate-breathing">
+            <Sparkles className="w-6 h-6 text-white animate-pulse" />
           </div>
 
           {/* Orbit lines */}
           <div className="absolute inset-0 rounded-full border border-purple-500/20 animate-pulse" />
-          <div className="absolute inset-[-8px] rounded-full border border-blue-500/10" />
+          <div className="absolute inset-[-4px] rounded-full border border-blue-500/10" />
         </div>
       )}
 
       {/* Expanded Chat Panel */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[80vh] bg-gradient-to-br from-zinc-900/95 to-black/95 rounded-3xl border border-purple-500/30 shadow-[0_0_60px_rgba(139,92,246,0.5)] flex flex-col">
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+            onClick={() => setIsExpanded(false)}
+          />
+          
+          {/* Side Panel from Bottom Right */}
+          <div className="fixed bottom-6 right-24 w-96 max-h-[32rem] bg-gradient-to-br from-zinc-900/98 to-black/98 rounded-2xl border border-purple-500/30 shadow-[0_0_40px_rgba(139,92,246,0.4)] flex flex-col z-50 animate-slide-in-from-bottom">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div className="flex items-center space-x-3">
@@ -267,7 +274,7 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
               </form>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
