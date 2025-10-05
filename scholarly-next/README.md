@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chrona 📚
+
+A smart academic dashboard that helps students manage their coursework through AI-powered automation.
+
+## What We're Building
+
+Chrona is an intelligent platform designed to streamline academic life by:
+
+- **Smart Calendar Integration** - Upload course syllabi and automatically sync all deadlines, exams, and class sessions to Google Calendar with dedicated calendars per course
+- **Canvas LMS Integration** - Track assignments, grades, and course progress across all your classes
+- **AI-Powered Parsing** - Use Gemini AI to extract structured information from syllabus documents (PDF/DOCX/TXT)
+
+## Features
+
+### 📅 Calendar Management
+- Upload syllabus files and extract events automatically
+- Create separate Google Calendars for each course with emoji identifiers
+- Smart event categorization (classes, exams, assignments)
+- Timezone-aware scheduling
+- Customizable reminders based on event type
+
+### 📊 Canvas Dashboard
+- View all course grades in one place
+- Track upcoming assignments across courses
+- Monitor assignment progress and deadlines
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **UI**: Tailwind CSS v4 with dark theme
+- **AI**: Google Gemini 2.5 Flash
+- **Authentication**: NextAuth.js with Google OAuth
+- **APIs**: Google Calendar API, Canvas LMS API
+- **PDF Processing**: PDF.js
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+
+- Google Cloud Console account (for Calendar API)
+- Canvas LMS API token (optional)
+- Gemini API key
+
+### Installation
+
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/gilxsilva/hackharvard-2025.git
+cd scholarly-next
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file:
+```env
+# Google OAuth
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
 
-## Learn More
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_random_secret_here
 
-To learn more about Next.js, take a look at the following resources:
+# AI
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Canvas (optional)
+CANVAS_API_URL=https://canvas.instructure.com
+CANVAS_API_TOKEN=your_canvas_token_here
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Run the development server
+```bash
+npm run dev
+```
 
-## Deploy on Vercel
+5. Open [http://localhost:3000](http://localhost:3000)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/    # NextAuth configuration
+│   │   ├── calendar/              # Calendar API routes
+│   │   └── canvas/                # Canvas LMS API routes
+│   ├── calendar/                  # Calendar page
+│   └── dashboard/                 # Main dashboard
+├── components/                    # Reusable UI components
+├── lib/
+│   ├── gemini.ts                 # Gemini AI integration
+│   ├── googleCalendar.ts         # Google Calendar client
+│   └── canvas.ts                 # Canvas API client
+└── types/                        # TypeScript type definitions
+```
+
+## Setup Guides
+
+- [Google Calendar Setup](./GOOGLE_CALENDAR_SETUP.md) - Detailed OAuth and API configuration
+
+## Roadmap
+
+- [x] Google Calendar integration with per-course calendars
+- [x] Canvas LMS grade tracking
+- [x] AI-powered syllabus parsing
+- [ ] Assignment deadline notifications
+- [ ] Study schedule generation
+- [ ] Multi-platform sync (Blackboard, Moodle)
+- [ ] Mobile app
+
+## Contributing
+
+This project was created for HackHarvard 2025.
+
+## License
+
+MIT
