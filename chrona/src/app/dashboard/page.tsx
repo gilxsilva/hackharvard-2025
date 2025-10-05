@@ -488,40 +488,40 @@ export default function DashboardPage() {
   console.log('🚀 Dashboard: Page component mounted/re-rendered at:', new Date().toISOString());
   console.log('🚀 Dashboard: Environment check - Canvas Base URL exists:', !!process.env.NEXT_PUBLIC_CANVAS_BASE_URL);
   console.log('🚀 Dashboard: Environment check - Canvas Token exists:', !!process.env.NEXT_PUBLIC_CANVAS_ACCESS_TOKEN);
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      {/* Legacy Header - will be replaced with space theme soon */}
+      <header className="bg-zinc-900/95 backdrop-blur-xl border-b border-purple-500/20 px-6 py-4 z-50 relative">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-blue-600">Scholarly</h1>
-              <span className="text-gray-500">Academic Dashboard</span>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Chrona</h1>
+              <span className="text-gray-400">Academic Dashboard</span>
             </div>
-            
+
             {/* Navigation */}
             <nav className="flex items-center space-x-6">
-              <Link 
-                href="/"
-                className="flex items-center space-x-2 text-blue-600 font-medium"
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-2 text-purple-400 font-medium"
               >
                 <Calendar className="w-4 h-4" />
                 <span className="text-sm">Dashboard</span>
               </Link>
-              <Link 
+              <Link
                 href="/calendar"
-                className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
+                className="flex items-center space-x-2 text-gray-400 hover:text-purple-400 transition-colors"
               >
                 <Calendar className="w-4 h-4" />
                 <span className="text-sm font-medium">Smart Calendar</span>
               </Link>
             </nav>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-700">Demo Student</span>
+              <span className="text-sm text-gray-300">Demo Student</span>
             </div>
           </div>
         </div>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
           </div>
 
           <ChatBar />
-          
+
           {/* Dashboard Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
