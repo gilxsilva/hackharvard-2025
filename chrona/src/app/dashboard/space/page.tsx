@@ -233,7 +233,7 @@ function StatsWidgetContent() {
 function SpaceDashboardContent() {
   const { toggleZoom, isFocused } = useZoomContext();
   const { config, snapToGrid, toggleGridSnap, toggleGuides, isEnabled, showGuides } = useGridSnap(false);
-  const [currentLayout, setCurrentLayout] = useState<LayoutMode>('orbital');
+  const [currentLayout, setCurrentLayout] = useState<LayoutMode>('grid');
   const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
   const [layoutMemory, setLayoutMemory] = useState<Record<LayoutMode, Record<string, Position>>>({
     orbital: {},
@@ -290,6 +290,8 @@ function SpaceDashboardContent() {
 
   // Initialize widget positions on client only - recalculate when visible widgets change
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     // Check if we have saved positions for this layout mode
     const savedPositions = layoutMemory[currentLayout];
     const hasSavedPositions = Object.keys(savedPositions).length === widgetIds.length;
@@ -298,12 +300,27 @@ function SpaceDashboardContent() {
       // Restore from memory
       setWidgetPositions(savedPositions);
     } else {
-      // Calculate new positions
-      const initialPositions: Record<string, Position> = {};
-      widgetIds.forEach((id, index) => {
-        initialPositions[id] = getPosition(index, widgetIds.length);
+      // Calculate new positions using the current layout algorithm
+      const layoutParams = {
+        centerX: window.innerWidth / 2,
+        centerY: window.innerHeight / 2,
+        widgetWidth: 380,
+        widgetHeight: 420
+      };
+
+      const newPositions = applyLayout(widgetIds, currentLayout, layoutParams);
+      const positionsMap: Record<string, Position> = {};
+      newPositions.forEach(pos => {
+        positionsMap[pos.id] = { x: pos.x, y: pos.y };
       });
-      setWidgetPositions(initialPositions);
+
+      setWidgetPositions(positionsMap);
+
+      // Save to memory
+      setLayoutMemory(prev => ({
+        ...prev,
+        [currentLayout]: positionsMap
+      }));
     }
   }, [widgetIds.length, currentLayout]); // eslint-disable-line react-hooks/exhaustive-deps
 
