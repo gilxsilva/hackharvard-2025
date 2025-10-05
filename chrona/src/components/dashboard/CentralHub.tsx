@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sparkles, X, Send } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { askGemini } from '@/lib/gemini';
 
 interface CentralHubProps {
@@ -12,13 +14,53 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
+  const [displayedResponse, setDisplayedResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const typewriterRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Typewriter animation effect
+  useEffect(() => {
+    if (response && !typing) {
+      setTyping(true);
+      setDisplayedResponse('');
+      
+      let currentIndex = 0;
+      
+      const typeNextCharacter = () => {
+        if (currentIndex < response.length) {
+          setDisplayedResponse(response.slice(0, currentIndex + 1));
+          currentIndex++;
+          typewriterRef.current = setTimeout(typeNextCharacter, Math.random() * 30 + 20); // Random typing speed between 20-50ms
+        } else {
+          setTyping(false);
+        }
+      };
+      
+      typeNextCharacter();
+    }
+    
+    return () => {
+      if (typewriterRef.current) {
+        clearTimeout(typewriterRef.current);
+      }
+    };
+  }, [response]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim() || loading) return;
 
     setLoading(true);
+    setResponse('');
+    setDisplayedResponse('');
+    setTyping(false);
+    
+    // Clear any existing typewriter animation
+    if (typewriterRef.current) {
+      clearTimeout(typewriterRef.current);
+    }
+    
     try {
       const result = await askGemini(query);
       setResponse(result);
@@ -79,10 +121,80 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
 
             {/* Chat Area */}
             <div className="flex-1 p-6 overflow-y-auto">
-              {response ? (
+              {(displayedResponse || loading) ? (
                 <div className="space-y-4">
-                  <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                    <p className="text-sm text-gray-300 whitespace-pre-wrap">{response}</p>
+                  <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                    {loading ? (
+                      <div className="flex items-center space-x-3 text-gray-400">
+                        <div className="animate-spin w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+                        <span className="text-sm">Analyzing your Canvas data...</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* AI Response Header */}
+                        <div className="flex items-center space-x-2 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <Sparkles className="w-4 h-4 text-purple-400" />
+                            <span className="text-sm font-medium text-gray-300">Chrona AI</span>
+                          </div>
+                          {typing && (
+                            <div className="flex items-center space-x-1">
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Markdown Formatted Response */}
+                        <div className="prose prose-invert prose-sm max-w-none">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              // Custom styling for markdown elements with dark theme
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-white">{children}</strong>
+                              ),
+                              em: ({ children }) => (
+                                <em className="italic text-gray-300">{children}</em>
+                              ),
+                              p: ({ children }) => (
+                                <p className="text-gray-300 leading-relaxed mb-3 last:mb-0">{children}</p>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="list-disc list-inside space-y-2 text-gray-300 ml-2">{children}</ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="list-decimal list-inside space-y-2 text-gray-300 ml-2">{children}</ol>
+                              ),
+                              li: ({ children }) => (
+                                <li className="text-gray-300">{children}</li>
+                              ),
+                              code: ({ children }) => (
+                                <code className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-sm font-mono border border-purple-500/30">{children}</code>
+                              ),
+                              blockquote: ({ children }) => (
+                                <blockquote className="border-l-4 border-purple-500 pl-4 italic text-gray-400 my-3 bg-purple-500/5 py-2">{children}</blockquote>
+                              ),
+                              h1: ({ children }) => (
+                                <h1 className="text-lg font-bold text-white mb-3 border-b border-white/20 pb-2">{children}</h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className="text-base font-semibold text-white mb-2">{children}</h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className="text-sm font-medium text-gray-200 mb-2">{children}</h3>
+                              ),
+                            }}
+                          >
+                            {displayedResponse}
+                          </ReactMarkdown>
+                          {typing && (
+                            <span className="inline-block w-3 h-5 bg-purple-500 animate-pulse ml-1 rounded-sm"></span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -123,16 +235,28 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ask me anything about your academics..."
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  disabled={loading}
+                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  disabled={loading || typing}
                 />
                 <button
                   type="submit"
-                  disabled={loading || !query.trim()}
+                  disabled={loading || typing || !query.trim()}
                   className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 rounded-xl text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span className="hidden sm:inline">Thinking...</span>
+                    </>
+                  ) : typing ? (
+                    <>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                      <span className="hidden sm:inline">Typing...</span>
+                    </>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />

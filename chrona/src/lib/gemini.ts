@@ -145,6 +145,16 @@ Please provide a helpful, accurate response based on the student's actual Canvas
 4. **Study Planning**: Suggest priorities based on upcoming assignments and grades
 5. **Progress Tracking**: Analyze grade trends and academic progress
 
+**FORMATTING REQUIREMENTS:**
+- Use **bold text** for important information, course names, grades, and key points
+- Use *italic text* for emphasis, suggestions, and secondary information
+- Use bullet points (•) for lists and organized information
+- Use numbers (1., 2., 3.) for step-by-step instructions or rankings
+- Include emojis when appropriate: 📊 for grades, 📚 for courses, ⏰ for deadlines, 📝 for assignments, ⚠️ for warnings, 🎉 for good news
+- Use \`code blocks\` for technical terms or specific values
+- Structure responses with clear headings using ## or ### when appropriate
+- Keep paragraphs concise and scannable
+
 Be conversational, supportive, and specific. Use the actual data provided. If asked about something not in the data, explain what information you do have access to.
 
 If the question is completely unrelated to academics, politely redirect to academic topics while being friendly.
@@ -163,48 +173,48 @@ const generateEnhancedFallbackResponse = (
     if (context.courseGrades.length > 0) {
       const gradesInfo = context.courseGrades
         .filter(grade => grade.current_grade)
-        .map(grade => `${grade.course_code}: ${grade.current_grade} (${grade.current_score}%)`)
-        .join(', ');
-      return `Here are your current grades: ${gradesInfo}`;
+        .map(grade => `• **${grade.course_code}**: ${grade.current_grade} (${grade.current_score}%)`)
+        .join('\n');
+      return `📊 **Your Current Grades:**\n\n${gradesInfo}`;
     }
-    return "I don't see any grades available in your Canvas data yet.";
+    return "📊 I don't see any grades available in your Canvas data yet.";
   }
 
   // Handle assignments questions  
   if (lowerQuestion.includes('assignment') || lowerQuestion.includes('due') || lowerQuestion.includes('homework')) {
     if (context.upcomingAssignments.length > 0) {
       const upcomingInfo = context.upcomingAssignments.slice(0, 3)
-        .map(assignment => `${assignment.name} (${assignment.course_code}) - Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}`)
-        .join('; ');
-      return `Your upcoming assignments: ${upcomingInfo}`;
+        .map(assignment => `• **${assignment.name}** (*${assignment.course_code}*) - ⏰ Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}`)
+        .join('\n');
+      return `📝 **Your Upcoming Assignments:**\n\n${upcomingInfo}`;
     }
-    return "You don't have any upcoming assignments showing in Canvas right now.";
+    return "📝 You don't have any upcoming assignments showing in Canvas right now.";
   }
 
   // Handle missing assignments
   if (lowerQuestion.includes('missing') || lowerQuestion.includes('late')) {
     if (context.missingAssignments.length > 0) {
       const missingInfo = context.missingAssignments.slice(0, 3)
-        .map(assignment => `${assignment.name} (${assignment.course_code})`)
-        .join(', ');
-      return `You have ${context.missingAssignments.length} missing assignments: ${missingInfo}`;
+        .map(assignment => `• **${assignment.name}** (*${assignment.course_code}*)`)
+        .join('\n');
+      return `⚠️ **Missing Assignments** (${context.missingAssignments.length} total):\n\n${missingInfo}`;
     }
-    return "Great news! You don't have any missing assignments.";
+    return "🎉 **Great news!** You don't have any missing assignments.";
   }
 
   // Handle courses questions
   if (lowerQuestion.includes('course') || lowerQuestion.includes('class')) {
     if (context.courses.length > 0) {
       const coursesInfo = context.courses
-        .map(course => course.course_code || course.name)
-        .join(', ');
-      return `You're enrolled in ${context.courses.length} courses: ${coursesInfo}`;
+        .map(course => `• **${course.course_code || course.name}**`)
+        .join('\n');
+      return `📚 **Your Enrolled Courses** (${context.courses.length} total):\n\n${coursesInfo}`;
     }
-    return "I don't see any courses in your Canvas data.";
+    return "📚 I don't see any courses in your Canvas data.";
   }
 
   // Default response
-  return "I'm your academic assistant! I can help you with questions about your grades, assignments, courses, and academic performance. What would you like to know?";
+  return `👋 **Hi there!** I'm your *academic assistant* powered by Canvas data.\n\n**I can help you with:**\n• 📊 **Grades** and academic performance\n• 📝 **Assignments** and deadlines\n• 📚 **Courses** and schedules\n• ⚠️ **Missing work** tracking\n\n*What would you like to know about your academics?*`;
 };
 
 
