@@ -524,6 +524,8 @@ function SpaceDashboardContent() {
           id="google-calendar"
           initialPosition={widgetPositions['google-calendar']}
           onPositionChange={(pos) => handlePositionChange('google-calendar', pos)}
+          isZoomed={isFocused('google-calendar')}
+          onDoubleClick={() => toggleZoom('google-calendar')}
         />
       )}
 

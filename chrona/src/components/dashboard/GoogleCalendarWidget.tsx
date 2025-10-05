@@ -41,13 +41,17 @@ interface GoogleCalendarWidgetProps {
   initialPosition: { x: number; y: number };
   onPositionChange?: (position: { x: number; y: number }) => void;
   className?: string;
+  isZoomed?: boolean;
+  onDoubleClick?: () => void;
 }
 
-export default function GoogleCalendarWidget({ 
+export default function GoogleCalendarWidget({
   id,
   initialPosition,
   onPositionChange,
-  className = ''
+  className = '',
+  isZoomed = false,
+  onDoubleClick
 }: GoogleCalendarWidgetProps) {
   const [events, setEvents] = useState<GoogleCalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -227,6 +231,9 @@ export default function GoogleCalendarWidget({
       onPositionChange={onPositionChange}
       className={className}
       icon={<Calendar className="w-4 h-4 text-blue-400" />}
+      isZoomed={isZoomed}
+      onDoubleClick={onDoubleClick}
+      glowColor="blue"
     >
       <div className="h-full flex flex-col">
         {/* Header with refresh button */}

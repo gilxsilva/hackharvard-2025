@@ -25,9 +25,9 @@ export default function CalendarWidget() {
             <Upload className="w-6 h-6 text-indigo-400" />
           </div>
           <div className="flex-1 text-left">
-            <div className="font-semibold text-white mb-1">Upload Syllabus</div>
+            <div className="font-semibold text-white mb-1">Semester Setup</div>
             <div className="text-sm text-gray-400">
-              Automatically generate calendar events
+              Upload syllabus to auto-add events
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function CalendarWidget() {
         className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 flex items-center justify-center space-x-2"
       >
         <Plus className="w-5 h-5" />
-        <span>Manage Calendar</span>
+        <span>Set Up Semester</span>
       </button>
     </div>
   );

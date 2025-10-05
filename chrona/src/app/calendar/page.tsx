@@ -436,10 +436,10 @@ export default function CalendarPage() {
           <div className="mb-8 animate-fade-in-up">
             <div className="flex items-center space-x-3 mb-4">
               <CalendarIcon className="w-8 h-8 text-indigo-400" />
-              <h1 className="text-3xl font-bold text-white">Smart Calendar</h1>
+              <h1 className="text-3xl font-bold text-white">Semester Setup</h1>
             </div>
             <p className="text-zinc-400 text-lg">
-              Upload your syllabus and automatically generate calendar events for classes, exams, and assignments.
+              Upload your syllabus. We'll add everything to your calendar automatically.
             </p>
           </div>
 

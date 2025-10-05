@@ -70,6 +70,20 @@ export default function Widget({
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
+  // Handle ESC key to close expanded widget
+  useEffect(() => {
+    if (isZoomed && onDoubleClick) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onDoubleClick();
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isZoomed, onDoubleClick]);
+
   const glowColors = {
     purple: 'shadow-[0_0_30px_rgba(139,92,246,0.5)]',
     blue: 'shadow-[0_0_30px_rgba(59,130,246,0.5)]',
@@ -128,9 +142,13 @@ export default function Widget({
       </div>
 
       {/* Resize hint */}
-      {!isZoomed && (
+      {!isZoomed ? (
         <div className="absolute bottom-2 right-2 text-xs text-white/30 select-none">
           Double-click to expand
+        </div>
+      ) : (
+        <div className="absolute bottom-2 right-2 text-xs text-white/30 select-none">
+          Press ESC to close
         </div>
       )}
     </div>
