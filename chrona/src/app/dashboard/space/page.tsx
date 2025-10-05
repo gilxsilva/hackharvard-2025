@@ -22,6 +22,10 @@ import { MissingAssignmentsWidget } from '@/components/dashboard/MissingAssignme
 import { GradeAnalyticsWidget } from '@/components/dashboard/GradeAnalyticsWidget';
 import { CourseWorkloadWidget } from '@/components/dashboard/CourseWorkloadWidget';
 import { RecentActivityWidget } from '@/components/dashboard/RecentActivityWidget';
+import { WidgetManager, type WidgetConfig } from '@/components/dashboard/WidgetManager';
+import { LayoutDebugger } from '@/components/debug/LayoutDebugger';
+import { Minimap } from '@/components/canvas/Minimap';
+import { calculateLayoutBounds, calculateOptimalScale, doesLayoutOverflow, type ViewportInfo } from '@/utils/layoutBoundsCalculator';
 
 // Mock data
 const mockAssignments = [
@@ -231,14 +235,37 @@ function SpaceDashboardContent() {
   const { config, snapToGrid, toggleGridSnap, toggleGuides, isEnabled, showGuides } = useGridSnap(false);
   const [currentLayout, setCurrentLayout] = useState<LayoutMode>('orbital');
   const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
+  const [layoutMemory, setLayoutMemory] = useState<Record<LayoutMode, Record<string, Position>>>({
+    orbital: {},
+    grid: {},
+    masonry: {},
+    spiral: {}
+  });
+  const [canvasScale, setCanvasScale] = useState(1);
+  const [viewportSize, setViewportSize] = useState({ width: 1920, height: 1080 });
+  const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
+  // Widget configurations with visibility state
+  const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>([
+    { id: 'courses', title: 'My Courses', visible: true, category: 'academic' },
+    { id: 'assignments', title: 'Upcoming Assignments', visible: true, category: 'academic' },
+    { id: 'grades', title: 'Course Grades', visible: true, category: 'academic' },
+    { id: 'stats', title: 'Weekly Overview', visible: true, category: 'analytics' },
+    { id: 'calendar', title: 'Smart Calendar', visible: true, category: 'calendar' },
+    { id: 'google-calendar', title: 'Google Calendar', visible: true, category: 'calendar' },
+    { id: 'missing', title: 'Missing Assignments', visible: true, category: 'academic' },
+    { id: 'analytics', title: 'Grade Analytics', visible: true, category: 'analytics' },
+    { id: 'workload', title: 'Course Workload', visible: true, category: 'analytics' },
+    { id: 'activity', title: 'Recent Activity', visible: true, category: 'analytics' },
+  ]);
 
-  const widgetIds = ['courses', 'assignments', 'grades', 'stats', 'calendar', 'google-calendar', 'missing', 'analytics', 'workload', 'activity'];
+  const visibleWidgets = widgetConfigs.filter(w => w.visible);
+  const widgetIds = visibleWidgets.map(w => w.id);
 
   // Calculate orbital positions (responsive)
-  const getPosition = (index: number, total: number = 10) => {
+  const getPosition = (index: number, total: number) => {
     const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 800;
     const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
-    const radius = Math.min(centerX, centerY) * 0.5;
+    const radius = Math.min(centerX, centerY) * 0.65; // Increased radius
     const angle = (index * 2 * Math.PI) / total - Math.PI / 2;
 
     return {
@@ -247,18 +274,44 @@ function SpaceDashboardContent() {
     };
   };
 
-  // Initialize widget positions on client only
+  // Track viewport size
   useEffect(() => {
-    const initialPositions: Record<string, Position> = {};
-    widgetIds.forEach((id, index) => {
-      initialPositions[id] = getPosition(index);
-    });
-    setWidgetPositions(initialPositions);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const updateViewport = () => {
+      setViewportSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
 
-  // Auto-arrange function
-  const handleAutoArrange = () => {
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
+  // Initialize widget positions on client only - recalculate when visible widgets change
+  useEffect(() => {
+    // Check if we have saved positions for this layout mode
+    const savedPositions = layoutMemory[currentLayout];
+    const hasSavedPositions = Object.keys(savedPositions).length === widgetIds.length;
+
+    if (hasSavedPositions) {
+      // Restore from memory
+      setWidgetPositions(savedPositions);
+    } else {
+      // Calculate new positions
+      const initialPositions: Record<string, Position> = {};
+      widgetIds.forEach((id, index) => {
+        initialPositions[id] = getPosition(index, widgetIds.length);
+      });
+      setWidgetPositions(initialPositions);
+    }
+  }, [widgetIds.length, currentLayout]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-arrange function with overflow detection and adaptive scaling
+  const handleAutoArrange = (layoutMode?: LayoutMode) => {
     if (typeof window === 'undefined') return;
+
+    const layoutToUse = layoutMode || currentLayout;
 
     const layoutParams = {
       centerX: window.innerWidth / 2,
@@ -267,12 +320,41 @@ function SpaceDashboardContent() {
       widgetHeight: 420
     };
 
-    const newPositions = applyLayout(widgetIds, currentLayout, layoutParams);
+    // Calculate new positions
+    const newPositions = applyLayout(widgetIds, layoutToUse, layoutParams);
+
+    // Check for overflow
+    const bounds = calculateLayoutBounds(newPositions, 380, 420);
+    const viewport: ViewportInfo = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      padding: 100
+    };
+
+    const overflows = doesLayoutOverflow(bounds, viewport);
+
+    if (overflows) {
+      // Calculate optimal scale to fit everything
+      const optimalScale = calculateOptimalScale(bounds, viewport);
+      setCanvasScale(optimalScale);
+
+      // Show notification about zoom adjustment
+      console.log(`Layout scaled to ${Math.round(optimalScale * 100)}% to fit`);
+    }
+
+    // Save positions to memory
     const positionsMap: Record<string, Position> = {};
     newPositions.forEach(pos => {
       positionsMap[pos.id] = { x: pos.x, y: pos.y };
     });
+
     setWidgetPositions(positionsMap);
+
+    // Update layout memory for this mode
+    setLayoutMemory(prev => ({
+      ...prev,
+      [layoutToUse]: positionsMap
+    }));
   };
 
   // Handle position change for individual widgets
@@ -285,6 +367,19 @@ function SpaceDashboardContent() {
       return { ...prev, [id]: position };
     });
   }, []);
+
+  // Widget management handlers
+  const handleToggleWidget = (id: string) => {
+    setWidgetConfigs(prev =>
+      prev.map(w => w.id === id ? { ...w, visible: !w.visible } : w)
+    );
+  };
+
+  const handleToggleAll = (visible: boolean) => {
+    setWidgetConfigs(prev =>
+      prev.map(w => ({ ...w, visible }))
+    );
+  };
 
   // Keyboard shortcut for toggling grid snap
   useKeyboardShortcuts([
@@ -311,7 +406,20 @@ function SpaceDashboardContent() {
         onAutoArrange={handleAutoArrange}
       />
 
-      {widgetPositions['courses'] && (
+      {/* Widget Manager */}
+      <WidgetManager
+        widgets={widgetConfigs}
+        onToggleWidget={handleToggleWidget}
+        onToggleAll={handleToggleAll}
+        isOpen={isWidgetManagerOpen}
+        onToggle={setIsWidgetManagerOpen}
+      />
+
+      {/* Layout Debugger - Visual feedback for layout changes */}
+      <LayoutDebugger currentLayout={currentLayout} widgetCount={widgetIds.length} />
+
+
+      {widgetPositions['courses'] && widgetConfigs.find(w => w.id === 'courses')?.visible && (
         <Widget
           id="courses"
           title="My Courses"
@@ -327,7 +435,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['assignments'] && (
+      {widgetPositions['assignments'] && widgetConfigs.find(w => w.id === 'assignments')?.visible && (
         <Widget
           id="assignments"
           title="Upcoming Assignments"
@@ -343,7 +451,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['grades'] && (
+      {widgetPositions['grades'] && widgetConfigs.find(w => w.id === 'grades')?.visible && (
         <Widget
           id="grades"
           title="Course Grades"
@@ -359,7 +467,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['stats'] && (
+      {widgetPositions['stats'] && widgetConfigs.find(w => w.id === 'stats')?.visible && (
         <Widget
           id="stats"
           title="Weekly Overview"
@@ -375,7 +483,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['calendar'] && (
+      {widgetPositions['calendar'] && widgetConfigs.find(w => w.id === 'calendar')?.visible && (
         <Widget
           id="calendar"
           title="Smart Calendar"
@@ -391,7 +499,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['google-calendar'] && (
+      {widgetPositions['google-calendar'] && widgetConfigs.find(w => w.id === 'google-calendar')?.visible && (
         <GoogleCalendarWidget
           id="google-calendar"
           initialPosition={widgetPositions['google-calendar']}
@@ -399,7 +507,7 @@ function SpaceDashboardContent() {
         />
       )}
 
-      {widgetPositions['missing'] && (
+      {widgetPositions['missing'] && widgetConfigs.find(w => w.id === 'missing')?.visible && (
         <Widget
           id="missing"
           title="Missing Assignments"
@@ -415,7 +523,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['analytics'] && (
+      {widgetPositions['analytics'] && widgetConfigs.find(w => w.id === 'analytics')?.visible && (
         <Widget
           id="analytics"
           title="Grade Analytics"
@@ -431,7 +539,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['workload'] && (
+      {widgetPositions['workload'] && widgetConfigs.find(w => w.id === 'workload')?.visible && (
         <Widget
           id="workload"
           title="Course Workload"
@@ -447,7 +555,7 @@ function SpaceDashboardContent() {
         </Widget>
       )}
 
-      {widgetPositions['activity'] && (
+      {widgetPositions['activity'] && widgetConfigs.find(w => w.id === 'activity')?.visible && (
         <Widget
           id="activity"
           title="Recent Activity"

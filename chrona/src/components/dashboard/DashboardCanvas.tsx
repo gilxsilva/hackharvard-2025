@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import SpaceBackground from './SpaceBackground';
 import CentralHub from './CentralHub';
 import CommandBar from '../navigation/CommandBar';
@@ -9,6 +9,7 @@ import QuickActionsOrb from '../navigation/QuickActionsOrb';
 import { useZoom } from '@/hooks/useZoom';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { ZoomableCanvas } from '../canvas/ZoomableCanvas';
 
 interface DashboardCanvasProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ interface DashboardCanvasProps {
 
 export default function DashboardCanvas({ children }: DashboardCanvasProps) {
   const { zoomState } = useZoom();
+  const [canvasScale, setCanvasScale] = useState(1);
   const {
     isCommandPaletteOpen,
     openCommandPalette,
@@ -55,22 +57,16 @@ export default function DashboardCanvas({ children }: DashboardCanvasProps) {
         onClose={closeCommandPalette}
       />
 
-      {/* Central AI Hub */}
+      {/* Central AI Hub - outside zoomable area */}
       <CentralHub />
 
-      {/* Widgets */}
-      <div className="relative w-full h-full">
-        {children}
-      </div>
+      {/* Zoomable Canvas with Widgets */}
+      <ZoomableCanvas onScaleChange={setCanvasScale}>
+        <div className="relative w-full h-full min-h-screen">
+          {children}
+        </div>
+      </ZoomableCanvas>
 
-      {/* Quick Actions Orb */}
-      <QuickActionsOrb
-        isVisible={zoomState === 'overview'}
-        onAddWidget={openWidgetManager}
-        onArrangeGrid={() => console.log('Arrange grid')}
-        onResetLayout={() => console.log('Reset layout')}
-        onExportData={() => console.log('Export data')}
-      />
 
       {/* Zoom Overlay */}
       {zoomState === 'focused' && (
