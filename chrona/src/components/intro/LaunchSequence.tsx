@@ -46,10 +46,10 @@ export default function LaunchSequence({ children, enabled = true }: LaunchSeque
           <div className="flex flex-col items-center space-y-8">
             <ChronaLogo size={160} animate={false} className="animate-breathing" />
             <div className="relative h-12">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-fadeIn">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-fade-in">
                 CHRONA
               </h1>
-              <p className="text-center text-gray-400 mt-2 text-sm animate-fadeIn" style={{ animationDelay: '0.3s' }}>
+              <p className="text-center text-gray-400 mt-2 text-sm animate-fade-in delay-300">
                 Your Cosmic Academic Dashboard
               </p>
             </div>
@@ -61,12 +61,12 @@ export default function LaunchSequence({ children, enabled = true }: LaunchSeque
 
         {/* Dashboard Fade In */}
         {phase === 'dashboard-fade' && (
-          <div className="absolute inset-0 bg-black animate-fadeOut" />
+          <div className="absolute inset-0 bg-black animate-fade-out" />
         )}
       </div>
 
       {/* Dashboard Content (behind intro) */}
-      <div className={phase === 'dashboard-fade' || isComplete ? 'animate-fadeIn' : 'opacity-0'}>
+      <div className={phase === 'dashboard-fade' || isComplete ? 'animate-fade-in' : 'opacity-0'}>
         {children}
       </div>
 

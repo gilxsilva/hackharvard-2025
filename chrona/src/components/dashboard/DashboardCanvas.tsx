@@ -37,7 +37,7 @@ export default function DashboardCanvas({ children }: DashboardCanvasProps) {
   ]);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden" style={{ background: '#0a0a14' }}>
+    <div className="relative min-h-screen w-full overflow-hidden bg-space-bg">
       {/* Space Background */}
       <SpaceBackground />
 

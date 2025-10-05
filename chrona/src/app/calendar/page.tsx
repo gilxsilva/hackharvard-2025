@@ -433,7 +433,7 @@ export default function CalendarPage() {
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Page Header */}
-          <div className="mb-8 animate-fadeInUp">
+          <div className="mb-8 animate-fade-in-up">
             <div className="flex items-center space-x-3 mb-4">
               <CalendarIcon className="w-8 h-8 text-indigo-400" />
               <h1 className="text-3xl font-bold text-white">Smart Calendar</h1>
@@ -444,7 +444,7 @@ export default function CalendarPage() {
           </div>
 
           {/* Progress Steps */}
-          <div className="mb-8 animate-fadeInUp" style={{ animationDelay: '100ms' }}>
+          <div className="mb-8 animate-fade-in-up delay-100">
             <div className="flex items-center justify-center space-x-8">
               {[
                 { number: 1, label: 'Upload Syllabus', icon: Upload },
@@ -489,7 +489,7 @@ export default function CalendarPage() {
             {/* Left Column - Main Content */}
             <div className={step === 1 ? 'lg:col-span-2' : ''}>
               {step === 1 && (
-                <div className="animate-fadeInUp" style={{ animationDelay: '200ms' }}>
+                <div className="animate-fade-in-up delay-200">
                   <h2 className="text-2xl font-semibold text-white mb-6">Step 1: Upload Your Syllabus</h2>
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
                     {!file ? (
@@ -526,7 +526,7 @@ export default function CalendarPage() {
                           </div>
                         </div>
                         {error && (
-                          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl animate-fadeInUp">
+                          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl animate-fade-in-up">
                             <div className="flex items-start space-x-3">
                               <AlertCircle className="w-5 h-5 text-rose-400 mt-0.5" />
                               <div className="flex-1">
@@ -566,7 +566,7 @@ export default function CalendarPage() {
               {step === 2 && (
                 <div className="min-h-screen bg-zinc-950 -mx-6 -my-8 px-6 py-8">
                   {/* Header Section */}
-                  <div className="mb-8 animate-slideIn">
+                  <div className="mb-8 animate-slide-in">
                     <h1 className="text-4xl font-bold text-white mb-2">
                       Review & Edit Events ✨
                     </h1>
@@ -580,7 +580,7 @@ export default function CalendarPage() {
                   {/* Main Layout: Calendar + Events Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
                     {/* Left: Mini Calendar */}
-                    <div className="animate-slideIn" style={{ animationDelay: '100ms' }}>
+                    <div className="animate-slide-in delay-100">
                       <MiniCalendar
                         selectedDate={selectedDate}
                         onDateSelect={setSelectedDate}
@@ -639,7 +639,7 @@ export default function CalendarPage() {
                           <div
                             className="bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-xl
                               border border-dashed border-zinc-700 rounded-xl p-6 flex flex-col items-center justify-center
-                              animate-fadeInUp"
+                              animate-fade-in-up"
                           >
                             <Plus className="w-12 h-12 text-zinc-600 mb-4" />
                             <p className="text-zinc-400 mb-4">Add a new event manually</p>
@@ -686,7 +686,7 @@ export default function CalendarPage() {
 
                       {/* Error Display */}
                       {error && (
-                        <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl animate-fadeInUp">
+                        <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl animate-fade-in-up">
                           <div className="flex items-start space-x-3">
                             <AlertCircle className="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
@@ -728,7 +728,7 @@ export default function CalendarPage() {
               )}
 
               {step === 3 && (
-                <div className="text-center py-16 animate-fadeInUp">
+                <div className="text-center py-16 animate-fade-in-up">
                   <div className="w-24 h-24 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                     <CheckCircle className="w-12 h-12 text-emerald-400" />
                   </div>
@@ -788,7 +788,7 @@ export default function CalendarPage() {
             {step === 1 && (
             <div className="space-y-6">
               {/* Tips */}
-              <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-6 animate-fadeInUp" style={{ animationDelay: '300ms' }}>
+              <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-6 animate-fade-in-up delay-300">
                 <h3 className="font-semibold text-indigo-300 mb-4 flex items-center gap-2">
                   <span className="text-2xl">💡</span>
                   Tips for Best Results
@@ -814,7 +814,7 @@ export default function CalendarPage() {
               </div>
 
               {/* Supported Formats */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 animate-fadeInUp" style={{ animationDelay: '350ms' }}>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 animate-fade-in-up delay-350">
                 <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
                   <span className="text-2xl">📁</span>
                   Supported Formats
@@ -836,7 +836,7 @@ export default function CalendarPage() {
               </div>
 
               {/* What Gets Extracted */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 animate-fadeInUp" style={{ animationDelay: '400ms' }}>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 animate-fade-in-up delay-400">
                 <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
                   <span className="text-2xl">🔍</span>
                   What We Extract

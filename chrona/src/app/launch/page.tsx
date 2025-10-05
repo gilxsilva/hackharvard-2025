@@ -47,7 +47,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: '#0a0a14' }}>
+    <div className="min-h-screen overflow-x-hidden bg-space-bg">
       {/* Space Background */}
       <div className="fixed inset-0">
         <SpaceBackground />
@@ -56,12 +56,12 @@ export default function LoginPage() {
       {/* Hero Section - Login */}
       <section className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo with breathing animation */}
-        <div className="mb-12 animate-fadeIn" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
+        <div className="mb-12 animate-fade-in" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
           <ChronaLogo size={200} animate={true} className="animate-breathing" />
         </div>
 
         {/* Brand Name */}
-        <div className="mb-16 animate-fadeIn" style={{ animationDelay: '0.3s', transform: `translateY(${scrollY * 0.3}px)` }}>
+        <div className="mb-16 animate-fade-in delay-300" style={{ transform: `translateY(${scrollY * 0.3}px)` }}>
           <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4 text-center">
             CHRONA
           </h1>
@@ -71,7 +71,7 @@ export default function LoginPage() {
         </div>
 
         {/* Sign In Button */}
-        <div className="animate-fadeIn" style={{ animationDelay: '0.6s', transform: `translateY(${scrollY * 0.2}px)` }}>
+        <div className="animate-fade-in delay-600" style={{ transform: `translateY(${scrollY * 0.2}px)` }}>
           <button
             onClick={handleSignIn}
             className="group relative px-8 py-4 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50"
@@ -105,7 +105,7 @@ export default function LoginPage() {
         </div>
 
         {/* Subtitle */}
-        <div className="mt-12 text-center animate-fadeIn" style={{ animationDelay: '0.9s', transform: `translateY(${scrollY * 0.2}px)` }}>
+        <div className="mt-12 text-center animate-fade-in delay-900" style={{ transform: `translateY(${scrollY * 0.2}px)` }}>
           <p className="text-gray-500 text-sm max-w-md">
             Sign in to access your personalized dashboard with course management,
             calendar integration, and academic analytics.
@@ -113,7 +113,7 @@ export default function LoginPage() {
         </div>
 
         {/* Scroll Down Indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-fadeIn flex flex-col items-center" style={{ animationDelay: '1.2s', opacity: Math.max(0, 1 - scrollY / 300) }}>
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-fade-in delay-1200 flex flex-col items-center" style={{ opacity: Math.max(0, 1 - scrollY / 300) }}>
           <p className="text-gray-400 text-sm mb-3">Discover more</p>
           <div className="animate-bounce">
             <ChevronDown className="w-8 h-8 text-purple-400" />
@@ -198,7 +198,7 @@ export default function LoginPage() {
               {/* Outer glow */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover:from-purple-400/40 group-hover:via-blue-400/40 group-hover:to-purple-400/40 transition-all duration-300 -z-20 blur-2xl scale-110"></div>
             </button>
-            <p className="text-gray-400 text-sm mt-4 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+            <p className="text-gray-400 text-sm mt-4 animate-fade-in delay-200">
               No credit card required • <span className="text-purple-400">Sign in with Google</span>
             </p>
           </div>

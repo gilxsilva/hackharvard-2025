@@ -120,7 +120,7 @@ export default function CommandPalette({ isOpen, onClose, commands = [] }: Comma
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm animate-fade-in">
       {/* Command Palette */}
       <div className="w-full max-w-2xl mx-4 bg-zinc-900/95 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden">
         {/* Search Input */}

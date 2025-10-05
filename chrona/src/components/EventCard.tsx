@@ -65,7 +65,7 @@ export default function EventCard({ event, onUpdate, onDelete, index }: EventCar
         group relative bg-gradient-to-br ${config.color} backdrop-blur-xl
         border ${config.borderColor} rounded-xl p-6
         hover:shadow-2xl hover:shadow-black/20 transition-all duration-300
-        animate-fadeInUp
+        animate-fade-in-up
       `}
       style={{ animationDelay: `${index * 50}ms` }}
     >

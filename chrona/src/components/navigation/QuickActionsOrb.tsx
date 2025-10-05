@@ -65,7 +65,7 @@ export default function QuickActionsOrb({
     <div className="fixed bottom-8 right-8 z-40">
       {/* Action Buttons (Radial Menu) */}
       {isExpanded && (
-        <div className="absolute bottom-16 right-0 space-y-3 animate-fadeIn">
+        <div className="absolute bottom-16 right-0 space-y-3 animate-fade-in">
           {actions.map((action, index) => {
             const Icon = action.icon;
             const delay = index * 50;

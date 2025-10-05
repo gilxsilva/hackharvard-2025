@@ -140,8 +140,8 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
                           {typing && (
                             <div className="flex items-center space-x-1">
                               <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce delay-100"></div>
+                              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce delay-200"></div>
                             </div>
                           )}
                         </div>
@@ -252,8 +252,8 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
                     <>
                       <div className="flex items-center space-x-1">
                         <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-100"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-200"></div>
                       </div>
                       <span className="hidden sm:inline">Typing...</span>
                     </>

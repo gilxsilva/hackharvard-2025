@@ -51,7 +51,7 @@ export default function WidgetContextMenu({
 
       {/* Context Menu */}
       <div
-        className="fixed z-[91] min-w-[180px] bg-zinc-900/95 backdrop-blur-2xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fadeIn"
+        className="fixed z-[91] min-w-[180px] bg-zinc-900/95 backdrop-blur-2xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`
