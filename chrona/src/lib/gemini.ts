@@ -1,5 +1,6 @@
-// Gemini AI integration for academic chat assistance
+// Enhanced Gemini AI integration with full Canvas context
 import { fetchCalendarEvents, CalendarEvent } from "./calendarApi";
+import { fetchCanvasContext, CanvasContext } from "./canvasContext";
 
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 const GEMINI_API_URL =
@@ -36,30 +37,14 @@ interface GeminiResponse {
 
 export const askGemini = async (question: string): Promise<string> => {
   try {
-    let calendarData: CalendarEvent[];
+    // Fetch comprehensive Canvas context
+    const canvasContext = await fetchCanvasContext();
 
-    try {
-      calendarData = await fetchCalendarEvents();
-    } catch (error) {
-      console.warn("Using mock calendar data:", error);
-      calendarData = mockCalendarEvents;
-    }
-
-    const contextPrompt = `
-You are a helpful academic assistant for a college student. You have access to their calendar data.
-
-Current calendar events:
-${JSON.stringify(calendarData, null, 2)}
-
-Current date and time: ${new Date().toISOString()}
-
-User question: ${question}
-
-Please provide a helpful, concise response about their schedule, classes, or academic activities. If the question is not related to their calendar or academics, politely redirect them to academic-related queries.
-`;
+    // Build comprehensive context prompt
+    const contextPrompt = buildCanvasContextPrompt(question, canvasContext);
 
     if (!GEMINI_API_KEY) {
-      return generateFallbackResponse(question, calendarData);
+      return generateEnhancedFallbackResponse(question, canvasContext);
     }
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -77,6 +62,10 @@ Please provide a helpful, concise response about their schedule, classes, or aca
             ],
           },
         ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1000,
+        }
       }),
     });
 
@@ -87,10 +76,138 @@ Please provide a helpful, concise response about their schedule, classes, or aca
     const data: GeminiResponse = await response.json();
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
-    console.error("Gemini API error:", error);
-    return generateFallbackResponse(question, mockCalendarEvents);
+    console.error("Enhanced Gemini API error:", error);
+    const fallbackContext = await fetchCanvasContext();
+    return generateEnhancedFallbackResponse(question, fallbackContext);
   }
 };
+
+// Build comprehensive context prompt with all Canvas data
+const buildCanvasContextPrompt = (question: string, context: CanvasContext): string => {
+  const currentDate = new Date().toISOString();
+
+  return `
+You are Chrona, an intelligent academic assistant for a college student. You have comprehensive access to their Canvas LMS data and can answer questions about their courses, grades, assignments, and academic performance.
+
+=== STUDENT'S CURRENT ACADEMIC DATA ===
+
+📚 ENROLLED COURSES (${context.courses.length} total):
+${context.courses.map(course => `
+  • ${course.course_code || course.name}
+    Name: ${course.name}
+    ID: ${course.id}
+`).join('')}
+
+📊 COURSE GRADES & PERFORMANCE:
+${context.courseGrades.map(grade => `
+  • ${grade.course_code}
+    Current Grade: ${grade.current_grade || 'No grade'} (${grade.current_score || 'N/A'}%)
+    Final Grade: ${grade.final_grade || 'No final grade'} (${grade.final_score || 'N/A'}%)
+`).join('')}
+
+📝 UPCOMING ASSIGNMENTS (Next 10):
+${context.upcomingAssignments.slice(0, 10).map(assignment => `
+  • ${assignment.name}
+    Course: ${assignment.course_code}
+    Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}
+    Points: ${assignment.points_possible || 0}
+`).join('')}
+
+⚠️  MISSING ASSIGNMENTS (${context.missingAssignments.length} total):
+${context.missingAssignments.slice(0, 5).map(assignment => `
+  • ${assignment.name}
+    Course: ${assignment.course_code}
+    Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}
+    Points: ${assignment.points_possible || 0}
+`).join('')}
+
+📈 RECENT GRADES (Last 5):
+${context.grades.slice(0, 5).map(grade => `
+  • ${grade.assignment.name}
+    Course: ${grade.course_code}
+    Score: ${grade.submission.score}/${grade.assignment.points_possible}
+    Graded: ${grade.submission.graded_at ? new Date(grade.submission.graded_at).toLocaleDateString() : 'Not graded'}
+`).join('')}
+
+=== CONTEXT INFO ===
+Current Date/Time: ${currentDate}
+Data Last Updated: ${context.lastUpdated}
+
+=== USER QUESTION ===
+${question}
+
+=== INSTRUCTIONS ===
+Please provide a helpful, accurate response based on the student's actual Canvas data above. You can:
+
+1. **Academic Performance**: Discuss grades, GPA trends, course performance
+2. **Assignment Management**: Help with upcoming deadlines, missing work, workload planning  
+3. **Course Information**: Provide details about enrolled courses, schedules
+4. **Study Planning**: Suggest priorities based on upcoming assignments and grades
+5. **Progress Tracking**: Analyze grade trends and academic progress
+
+Be conversational, supportive, and specific. Use the actual data provided. If asked about something not in the data, explain what information you do have access to.
+
+If the question is completely unrelated to academics, politely redirect to academic topics while being friendly.
+`;
+};
+
+// Enhanced fallback response generator using Canvas context
+const generateEnhancedFallbackResponse = (
+  question: string,
+  context: CanvasContext
+): string => {
+  const lowerQuestion = question.toLowerCase();
+
+  // Handle grades questions
+  if (lowerQuestion.includes('grade') || lowerQuestion.includes('score')) {
+    if (context.courseGrades.length > 0) {
+      const gradesInfo = context.courseGrades
+        .filter(grade => grade.current_grade)
+        .map(grade => `${grade.course_code}: ${grade.current_grade} (${grade.current_score}%)`)
+        .join(', ');
+      return `Here are your current grades: ${gradesInfo}`;
+    }
+    return "I don't see any grades available in your Canvas data yet.";
+  }
+
+  // Handle assignments questions  
+  if (lowerQuestion.includes('assignment') || lowerQuestion.includes('due') || lowerQuestion.includes('homework')) {
+    if (context.upcomingAssignments.length > 0) {
+      const upcomingInfo = context.upcomingAssignments.slice(0, 3)
+        .map(assignment => `${assignment.name} (${assignment.course_code}) - Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}`)
+        .join('; ');
+      return `Your upcoming assignments: ${upcomingInfo}`;
+    }
+    return "You don't have any upcoming assignments showing in Canvas right now.";
+  }
+
+  // Handle missing assignments
+  if (lowerQuestion.includes('missing') || lowerQuestion.includes('late')) {
+    if (context.missingAssignments.length > 0) {
+      const missingInfo = context.missingAssignments.slice(0, 3)
+        .map(assignment => `${assignment.name} (${assignment.course_code})`)
+        .join(', ');
+      return `You have ${context.missingAssignments.length} missing assignments: ${missingInfo}`;
+    }
+    return "Great news! You don't have any missing assignments.";
+  }
+
+  // Handle courses questions
+  if (lowerQuestion.includes('course') || lowerQuestion.includes('class')) {
+    if (context.courses.length > 0) {
+      const coursesInfo = context.courses
+        .map(course => course.course_code || course.name)
+        .join(', ');
+      return `You're enrolled in ${context.courses.length} courses: ${coursesInfo}`;
+    }
+    return "I don't see any courses in your Canvas data.";
+  }
+
+  // Default response
+  return "I'm your academic assistant! I can help you with questions about your grades, assignments, courses, and academic performance. What would you like to know?";
+};
+
+
 
 const generateFallbackResponse = (
   question: string,
@@ -294,8 +411,7 @@ ${text}
       console.error("❌ JSON parsing failed - raw response may not be valid JSON");
     }
     throw new Error(
-      `Failed to parse syllabus: ${
-        error instanceof Error ? error.message : "Unknown error"
+      `Failed to parse syllabus: ${error instanceof Error ? error.message : "Unknown error"
       }`
     );
   }
