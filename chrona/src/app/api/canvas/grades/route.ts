@@ -37,13 +37,16 @@ export async function GET() {
             );
         }
 
-        // First, fetch all courses
-        const coursesResponse = await fetch(`${baseUrl}/api/v1/courses?enrollment_state=active&per_page=100`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        // Fetch courses with student enrollment
+        const coursesResponse = await fetch(
+            `${baseUrl}/api/v1/courses?enrollment_type=student&enrollment_state=active&per_page=100`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         if (!coursesResponse.ok) {
             return NextResponse.json(
@@ -55,47 +58,45 @@ export async function GET() {
         const courses: CanvasCourse[] = await coursesResponse.json();
         const allGrades: any[] = [];
 
-        // Fetch grades for each course
+        // Fetch assignments with submissions for each course
         for (const course of courses) {
             try {
-                // Get assignments for the course
-                const assignmentsResponse = await fetch(`${baseUrl}/api/v1/courses/${course.id}/assignments?per_page=50`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                // Get assignments with submissions included - much more efficient!
+                const assignmentsResponse = await fetch(
+                    `${baseUrl}/api/v1/courses/${course.id}/assignments?` +
+                    `include[]=submission&` +
+                    `per_page=100`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
 
                 if (assignmentsResponse.ok) {
-                    const assignments: CanvasAssignment[] = await assignmentsResponse.json();
+                    const assignments: (CanvasAssignment & { submission?: CanvasSubmission })[] = await assignmentsResponse.json();
 
-                    // Get submissions for each assignment
-                    for (const assignment of assignments) {
-                        try {
-                            const submissionsResponse = await fetch(`${baseUrl}/api/v1/courses/${course.id}/assignments/${assignment.id}/submissions/self`, {
-                                headers: {
-                                    'Authorization': `Bearer ${accessToken}`,
-                                    'Content-Type': 'application/json',
-                                },
-                            });
+                    // Filter assignments that have been graded
+                    const gradedAssignments = assignments
+                        .filter(assignment =>
+                            assignment.submission &&
+                            (assignment.submission.grade !== null || assignment.submission.score !== null)
+                        )
+                        .map(assignment => ({
+                            assignment: {
+                                id: assignment.id,
+                                name: assignment.name,
+                                points_possible: assignment.points_possible,
+                                course_id: assignment.course_id,
+                                html_url: assignment.html_url
+                            },
+                            submission: assignment.submission!,
+                            course_name: course.name,
+                            course_code: course.course_code
+                        }));
 
-                            if (submissionsResponse.ok) {
-                                const submission: CanvasSubmission = await submissionsResponse.json();
-
-                                // Only include graded submissions
-                                if (submission.grade !== null || submission.score !== null) {
-                                    allGrades.push({
-                                        assignment,
-                                        submission,
-                                        course_name: course.name,
-                                        course_code: course.course_code
-                                    });
-                                }
-                            }
-                        } catch (error) {
-                            console.warn(`Failed to fetch submission for assignment ${assignment.id}:`, error);
-                        }
-                    }
+                    allGrades.push(...gradedAssignments);
                 }
             } catch (error) {
                 console.warn(`Failed to fetch assignments for course ${course.name}:`, error);

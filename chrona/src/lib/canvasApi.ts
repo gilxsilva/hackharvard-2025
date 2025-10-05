@@ -48,7 +48,7 @@ export interface CanvasCourseGrade {
 
 // Fetch user's active courses
 export const fetchCanvasCourses = async (): Promise<CanvasCourse[]> => {
-    console.log('🔍 Fetching courses from Canvas...');
+    console.log('Fetching courses from Canvas...');
     const response = await fetch('/api/canvas/courses');
 
     if (!response.ok) {
@@ -57,15 +57,12 @@ export const fetchCanvasCourses = async (): Promise<CanvasCourse[]> => {
     }
 
     const courses = await response.json();
-    console.log('📚 Courses received:', courses.length, 'active courses');
-    console.log('📋 Course list:', courses.map((c: CanvasCourse) => ({ id: c.id, name: c.name, code: c.course_code })));
-
     return courses;
 };
 
 // Fetch assignments for a specific course
 export const fetchCourseAssignments = async (courseId: number): Promise<CanvasAssignment[]> => {
-    console.log(`📝 Fetching assignments for course ID: ${courseId}`);
+    console.log(`Fetching assignments for course ID: ${courseId}`);
     const response = await fetch(`/api/canvas/courses/${courseId}/assignments`);
 
     if (!response.ok) {
@@ -74,7 +71,6 @@ export const fetchCourseAssignments = async (courseId: number): Promise<CanvasAs
     }
 
     const assignments = await response.json();
-    console.log(`📋 Course ${courseId} assignments:`, assignments.length, 'total assignments');
 
     return assignments;
 };
@@ -82,7 +78,7 @@ export const fetchCourseAssignments = async (courseId: number): Promise<CanvasAs
 // Fetch all upcoming assignments across all courses (optimized with single API call)
 export const fetchUpcomingAssignments = async () => {
     try {
-        console.log('🚀 Starting to fetch all upcoming assignments...');
+        console.log('Starting to fetch all upcoming assignments...');
         const response = await fetch('/api/canvas/assignments/upcoming');
 
         if (!response.ok) {
@@ -92,8 +88,6 @@ export const fetchUpcomingAssignments = async () => {
 
         const upcomingAssignments = await response.json();
 
-        console.log(`⏰ Retrieved ${upcomingAssignments.length} upcoming assignments`);
-        console.log('📋 Upcoming assignments details:');
         upcomingAssignments.slice(0, 5).forEach((assignment: any, index: number) => {
             console.log(`  ${index + 1}. ${assignment.name} (${assignment.course_name}) - Due: ${assignment.due_at} - Points: ${assignment.points_possible}`);
         });
@@ -107,7 +101,7 @@ export const fetchUpcomingAssignments = async () => {
 
 // Fetch grades for a specific course
 export const fetchCourseGrades = async (courseId: number): Promise<CanvasGrade[]> => {
-    console.log(`🎯 Fetching grades for course ID: ${courseId}`);
+    console.log(`Fetching grades for course ID: ${courseId}`);
     const response = await fetch(`/api/canvas/courses/${courseId}/grades`);
 
     if (!response.ok) {
@@ -116,7 +110,6 @@ export const fetchCourseGrades = async (courseId: number): Promise<CanvasGrade[]
     }
 
     const grades = await response.json();
-    console.log(`📊 Course ${courseId} grades:`, grades.length, 'graded assignments');
 
     return grades;
 };
@@ -124,7 +117,7 @@ export const fetchCourseGrades = async (courseId: number): Promise<CanvasGrade[]
 // Fetch all grades across all courses
 export const fetchAllGrades = async (): Promise<CanvasGrade[]> => {
     try {
-        console.log('🎯 Starting to fetch all grades...');
+        console.log('Starting to fetch all grades...');
         const response = await fetch('/api/canvas/grades');
 
         if (!response.ok) {
@@ -133,12 +126,6 @@ export const fetchAllGrades = async (): Promise<CanvasGrade[]> => {
         }
 
         const grades = await response.json();
-
-        console.log(`📊 Retrieved ${grades.length} graded assignments`);
-        console.log('📋 Recent grades:');
-        grades.slice(0, 5).forEach((grade: any, index: number) => {
-            console.log(`  ${index + 1}. ${grade.assignment.name} (${grade.course_name}) - Grade: ${grade.submission.grade} (${grade.submission.score}/${grade.assignment.points_possible})`);
-        });
 
         return grades;
     } catch (error) {
@@ -150,7 +137,7 @@ export const fetchAllGrades = async (): Promise<CanvasGrade[]> => {
 // Fetch overall course grades (final grades for each course)
 export const fetchOverallCourseGrades = async (): Promise<CanvasCourseGrade[]> => {
     try {
-        console.log('🎓 Starting to fetch course grades...');
+        console.log('Starting to fetch course grades...');
         const response = await fetch('/api/canvas/course-grades');
 
         if (!response.ok) {
@@ -159,14 +146,6 @@ export const fetchOverallCourseGrades = async (): Promise<CanvasCourseGrade[]> =
         }
 
         const courseGrades = await response.json();
-
-        console.log(`📊 Retrieved ${courseGrades.length} course grades`);
-        console.log('📋 Course grades:');
-        courseGrades.slice(0, 5).forEach((grade: CanvasCourseGrade, index: number) => {
-            const displayGrade = grade.current_grade || grade.final_grade || 'No Grade';
-            const displayScore = grade.current_score || grade.final_score || 'No Score';
-            console.log(`  ${index + 1}. ${grade.course_code} (${grade.course_name}) - Grade: ${displayGrade} (${displayScore}%)`);
-        });
 
         return courseGrades;
     } catch (error) {

@@ -29,7 +29,7 @@ export async function GET() {
         }
 
         // First, fetch all courses
-        const coursesResponse = await fetch(`${baseUrl}/api/v1/courses?enrollment_state=active&per_page=100`, {
+        const coursesResponse = await fetch(`${baseUrl}/api/v1/courses?enrollment_state=active&per_page=35`, {
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
@@ -46,15 +46,23 @@ export async function GET() {
         const courses: CanvasCourse[] = await coursesResponse.json();
         const allAssignments: (CanvasAssignment & { course_name: string })[] = [];
 
-        // Fetch assignments for each course
+        // Fetch assignments for each course with optimized parameters
         for (const course of courses) {
             try {
-                const assignmentsResponse = await fetch(`${baseUrl}/api/v1/courses/${course.id}/assignments?per_page=100`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                // Use bucket=upcoming to filter server-side, order by due_at, and include submission info
+                const assignmentsResponse = await fetch(
+                    `${baseUrl}/api/v1/courses/${course.id}/assignments?` +
+                    `bucket=upcoming&` +
+                    `order_by=due_at&` +
+                    `include[]=submission&` +
+                    `per_page=100`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
 
                 if (assignmentsResponse.ok) {
                     const assignments: CanvasAssignment[] = await assignmentsResponse.json();
@@ -69,17 +77,15 @@ export async function GET() {
             }
         }
 
-        // Filter for upcoming assignments only
-        const upcomingAssignments = allAssignments
-            .filter(assignment =>
-                assignment.due_at &&
-                new Date(assignment.due_at) > new Date()
-            )
-            .sort((a, b) =>
-                new Date(a.due_at!).getTime() - new Date(b.due_at!).getTime()
-            );
+        // Since we're using bucket=upcoming, assignments are already filtered and sorted by due_at
+        // Just sort across all courses to maintain chronological order
+        const sortedAssignments = allAssignments.sort((a, b) => {
+            if (!a.due_at) return 1;
+            if (!b.due_at) return -1;
+            return new Date(a.due_at).getTime() - new Date(b.due_at).getTime();
+        });
 
-        return NextResponse.json(upcomingAssignments);
+        return NextResponse.json(sortedAssignments);
     } catch (error) {
         console.error('Error fetching Canvas assignments:', error);
         return NextResponse.json(

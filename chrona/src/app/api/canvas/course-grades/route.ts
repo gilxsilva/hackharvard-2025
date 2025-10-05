@@ -4,6 +4,7 @@ interface CanvasCourse {
     id: number;
     name: string;
     course_code: string;
+    enrollments?: CanvasEnrollment[];
 }
 
 interface CanvasEnrollment {
@@ -13,14 +14,14 @@ interface CanvasEnrollment {
     type: string;
     role: string;
     enrollment_state: string;
-    grades: {
-        current_grade: string | null;
-        current_score: number | null;
-        final_grade: string | null;
-        final_score: number | null;
-        unposted_current_score: number | null;
-        unposted_final_score: number | null;
-    };
+    computed_current_score: number | null;
+    computed_final_score: number | null;
+    computed_current_grade: string | null;
+    computed_final_grade: string | null;
+    unposted_current_score?: number | null;
+    unposted_final_score?: number | null;
+    unposted_current_grade?: string | null;
+    unposted_final_grade?: string | null;
 }
 
 export async function GET() {
@@ -35,30 +36,20 @@ export async function GET() {
             );
         }
 
-        // Fetch enrollments with grades
-        const enrollmentsResponse = await fetch(`${baseUrl}/api/v1/users/self/enrollments?state[]=active&per_page=100&include[]=total_scores`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!enrollmentsResponse.ok) {
-            return NextResponse.json(
-                { error: `Canvas API error: ${enrollmentsResponse.status} ${enrollmentsResponse.statusText}` },
-                { status: enrollmentsResponse.status }
-            );
-        }
-
-        const enrollments: CanvasEnrollment[] = await enrollmentsResponse.json();
-
-        // Fetch course details to get course names
-        const coursesResponse = await fetch(`${baseUrl}/api/v1/courses?enrollment_state=active&per_page=100`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        // Fetch courses with grade information included
+        const coursesResponse = await fetch(
+            `${baseUrl}/api/v1/courses?` +
+            `enrollment_type=student&` +
+            `enrollment_state=active&` +
+            `include[]=total_scores&` +
+            `per_page=50`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
 
         if (!coursesResponse.ok) {
             return NextResponse.json(
@@ -69,30 +60,40 @@ export async function GET() {
 
         const courses: CanvasCourse[] = await coursesResponse.json();
 
-        // Combine enrollment grades with course information
-        const courseGrades = enrollments
-            .filter(enrollment => enrollment.type === 'StudentEnrollment')
-            .map(enrollment => {
-                const course = courses.find(c => c.id === enrollment.course_id);
-                return {
-                    course_id: enrollment.course_id,
-                    course_name: course?.name || 'Unknown Course',
-                    course_code: course?.course_code || 'Unknown',
-                    current_grade: enrollment.grades?.current_grade || null,
-                    current_score: enrollment.grades?.current_score || null,
-                    final_grade: enrollment.grades?.final_grade || null,
-                    final_score: enrollment.grades?.final_score || null,
-                    unposted_current_score: enrollment.grades?.unposted_current_score || null,
-                    unposted_final_score: enrollment.grades?.unposted_final_score || null,
+
+
+        // Extract grade information from courses
+        const courseGrades = courses
+            .filter(course => course.enrollments && course.enrollments.length > 0)
+            .map(course => {
+                // Get the student enrollment (should be only one since we filtered by enrollment_type=student)
+                const studentEnrollment = course.enrollments!.find(enrollment =>
+                    enrollment.type === 'student' || enrollment.type === 'StudentEnrollment'
+                );
+
+                if (!studentEnrollment) {
+                    return null;
+                }
+
+                const gradeResult = {
+                    course_id: course.id,
+                    course_name: course.name,
+                    course_code: course.course_code,
+                    current_grade: studentEnrollment.computed_current_grade || null,
+                    current_score: studentEnrollment.computed_current_score || null,
+                    final_grade: studentEnrollment.computed_final_grade || null,
+                    final_score: studentEnrollment.computed_final_score || null,
+                    unposted_current_score: studentEnrollment.unposted_current_score || null,
+                    unposted_final_score: studentEnrollment.unposted_final_score || null,
+                    unposted_current_grade: studentEnrollment.unposted_current_grade || null,
+                    unposted_final_grade: studentEnrollment.unposted_final_grade || null,
                 };
+
+                return gradeResult;
             })
-            .filter(grade =>
-                // Only include courses that have some grade data
-                grade.current_score !== null ||
-                grade.final_score !== null ||
-                grade.current_grade !== null ||
-                grade.final_grade !== null
-            );
+            .filter(grade => grade !== null); // Show all courses, even without grades
+
+
 
         return NextResponse.json(courseGrades);
     } catch (error) {
