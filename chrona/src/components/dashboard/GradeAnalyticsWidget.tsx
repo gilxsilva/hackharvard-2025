@@ -217,20 +217,11 @@ export function GradeAnalyticsWidget({ className = '' }: { className?: string })
         }
     };
 
-    const getTrendColor = (trend: 'improving' | 'declining' | 'stable') => {
-        switch (trend) {
-            case 'improving': return 'text-green-600';
-            case 'declining': return 'text-red-600';
-            case 'stable': return 'text-gray-600';
-        }
-    };
-
     if (loading) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Grade Analytics</h3>
-                <div className="flex items-center justify-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
                 </div>
             </div>
         );
@@ -238,65 +229,71 @@ export function GradeAnalyticsWidget({ className = '' }: { className?: string })
 
     if (error || !analytics) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Grade Analytics</h3>
-                <div className="flex items-center justify-center h-full text-red-500">
-                    <p>{error || 'No data available'}</p>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64 text-red-400">
+                    <p className="text-sm">{error || 'No data available'}</p>
                 </div>
             </div>
         );
     }
 
+    const getTrendColorDark = (trend: 'improving' | 'declining' | 'stable') => {
+        switch (trend) {
+            case 'improving': return 'text-green-400';
+            case 'declining': return 'text-red-400';
+            case 'stable': return 'text-gray-400';
+        }
+    };
+
     return (
-        <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Grade Analytics</h3>
-                <span className={`text-sm font-medium ${getTrendColor(analytics.recent_trend)}`}>
+        <div className={`space-y-4 ${className}`}>
+            <div className="flex items-center justify-between">
+                <span className={`text-sm font-medium ${getTrendColorDark(analytics.recent_trend)}`}>
                     {getTrendIcon(analytics.recent_trend)} {analytics.recent_trend}
                 </span>
             </div>
-            
+
             {/* Key Metrics */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-700">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <div className="text-3xl font-bold text-blue-400">
                         {!isFinite(analytics.overall_gpa) ? '0.00' : analytics.overall_gpa.toFixed(2)}
                     </div>
-                    <div className="text-xs text-blue-600">Overall GPA</div>
+                    <div className="text-xs text-gray-400 mt-1">Overall GPA</div>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-2xl font-bold text-green-700">
+                <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <div className="text-3xl font-bold text-green-400">
                         {!isFinite(analytics.average_score) || analytics.average_score === 0 ? 'N/A' : `${analytics.average_score.toFixed(1)}%`}
                     </div>
-                    <div className="text-xs text-green-600">Avg Score</div>
+                    <div className="text-xs text-gray-400 mt-1">Avg Score</div>
                 </div>
             </div>
-            
+
             {/* Course Performance */}
-            <div className="space-y-2 h-40 overflow-y-auto">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Course Performance</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+                <h4 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Course Performance</h4>
                 {analytics.course_performance.slice(0, 8).map((course, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-900">
+                            <span className="text-sm font-medium text-white">
                                 {course.course_code}
                             </span>
-                            <span className={`text-xs ${getTrendColor(course.trend)}`}>
+                            <span className={`text-xs ${getTrendColorDark(course.trend)}`}>
                                 {getTrendIcon(course.trend)}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-gray-300">
                                 {!isFinite(course.average) || course.average === 0 ? 'N/A' : `${course.average.toFixed(1)}%`}
                             </span>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-500">
                                 ({course.grade_count})
                             </span>
                         </div>
                     </div>
                 ))}
             </div>
-            
+
         </div>
     );
 }

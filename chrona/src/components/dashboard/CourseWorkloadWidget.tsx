@@ -107,17 +107,16 @@ export function CourseWorkloadWidget({ className = '' }: { className?: string })
     };
 
     const getWorkloadColor = (urgencyBreakdown: CourseWorkload['urgency_breakdown']) => {
-        if (urgencyBreakdown.overdue > 0) return 'border-red-500 bg-red-50';
-        if (urgencyBreakdown.urgent > 0) return 'border-orange-500 bg-orange-50';
-        return 'border-green-500 bg-green-50';
+        if (urgencyBreakdown.overdue > 0) return 'border-red-500 bg-red-500/10';
+        if (urgencyBreakdown.urgent > 0) return 'border-orange-500 bg-orange-500/10';
+        return 'border-green-500 bg-green-500/10';
     };
 
     if (loading) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Workload</h3>
-                <div className="flex items-center justify-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
                 </div>
             </div>
         );
@@ -125,70 +124,68 @@ export function CourseWorkloadWidget({ className = '' }: { className?: string })
 
     if (error) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Workload</h3>
-                <div className="flex items-center justify-center h-full text-red-500">
-                    <p>{error}</p>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64 text-red-400">
+                    <p className="text-sm">{error}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Course Workload</h3>
-                <span className="text-sm text-gray-500">
+        <div className={`space-y-4 ${className}`}>
+            <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400">
                     {workload.reduce((total, course) => total + course.assignment_count, 0)} assignments
                 </span>
             </div>
-            
-            <div className="space-y-2 overflow-y-auto" style={{ height: 'calc(100% - 4rem)' }}>
+
+            <div className="space-y-2 max-h-80 overflow-y-auto">
                 {workload.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                        <p>No upcoming assignments</p>
+                    <div className="flex items-center justify-center h-64 text-gray-400">
+                        <p className="text-sm">No upcoming assignments</p>
                     </div>
                 ) : (
                     workload.map((course) => (
-                        <div 
-                            key={course.course_id} 
-                            className={`p-3 border-l-4 rounded-r-lg ${getWorkloadColor(course.urgency_breakdown)}`}
+                        <div
+                            key={course.course_id}
+                            className={`p-3 border-l-4 rounded-r-lg hover:bg-white/10 transition-colors ${getWorkloadColor(course.urgency_breakdown)}`}
                         >
                             <div className="flex items-center justify-between mb-1">
-                                <h4 className="text-sm font-semibold text-gray-900 truncate">
+                                <h4 className="text-sm font-semibold text-white truncate">
                                     {course.course_code}
                                 </h4>
-                                <span className="text-xs text-gray-600">
+                                <span className="text-xs text-gray-300">
                                     {course.assignment_count} assignments
                                 </span>
                             </div>
-                            
+
                             <div className="flex items-center justify-between text-xs mb-2">
-                                <span className="text-gray-500 truncate flex-1">
+                                <span className="text-gray-400 truncate flex-1">
                                     {course.total_points} total points
                                 </span>
-                                
+
                                 <div className="flex gap-1 ml-2">
                                     {course.urgency_breakdown.overdue > 0 && (
-                                        <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-xs">
-                                            {course.urgency_breakdown.overdue} urgent
+                                        <span className="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-xs">
+                                            {course.urgency_breakdown.overdue} overdue
                                         </span>
                                     )}
                                     {course.urgency_breakdown.urgent > 0 && (
-                                        <span className="bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded text-xs">
+                                        <span className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded text-xs">
                                             {course.urgency_breakdown.urgent} urgent
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            
+
                             {/* Show only the next assignment to save space */}
                             {course.upcoming_assignments.length > 0 && (
-                                <div className="text-xs text-gray-600 flex justify-between">
+                                <div className="text-xs text-gray-300 flex justify-between">
                                     <span className="truncate flex-1">{course.upcoming_assignments[0].name}</span>
-                                    <span className="ml-2 text-xs">
-                                        {course.upcoming_assignments[0].due_at ? 
-                                            new Date(course.upcoming_assignments[0].due_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : 
+                                    <span className="ml-2 text-xs text-gray-400">
+                                        {course.upcoming_assignments[0].due_at ?
+                                            new Date(course.upcoming_assignments[0].due_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) :
                                             'No due date'}
                                     </span>
                                 </div>

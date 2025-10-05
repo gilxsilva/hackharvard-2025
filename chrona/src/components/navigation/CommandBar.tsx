@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, Settings, Grid3x3, Calendar, Bell, HelpCircle } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -18,6 +19,7 @@ export default function CommandBar({
   onOpenHelp
 }: CommandBarProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -46,7 +48,7 @@ export default function CommandBar({
     { icon: User, label: 'Profile', action: () => setShowProfileMenu(!showProfileMenu) },
     { icon: Settings, label: 'Settings', action: onOpenSettings },
     { icon: Grid3x3, label: 'Widgets', action: onOpenWidgetManager },
-    { icon: Calendar, label: 'Calendar', action: onToggleCalendar },
+    { icon: Calendar, label: 'Calendar', action: () => router.push('/calendar') },
     { icon: Bell, label: 'Notifications', badge: 3 },
     { icon: HelpCircle, label: 'Help', action: onOpenHelp }
   ];

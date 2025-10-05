@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Upload, FileText, Clock, MapPin, User, CheckCircle, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Upload, FileText, Clock, MapPin, User, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { callGeminiForEventParsing, SyllabusEvent, CourseInfo } from '@/lib/gemini';
 import { getUserTimezone, getCommonTimezones } from '@/lib/googleCalendar';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -152,6 +153,7 @@ async function extractTextFromTXT(file: File): Promise<string> {
 
 export default function CalendarPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [step, setStep] = useState(1); // 1: Upload, 2: Review, 3: Confirm
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -358,6 +360,16 @@ export default function CalendarPage() {
       <header className="bg-zinc-900/50 backdrop-blur-xl border-b border-zinc-800 px-6 py-4 sticky top-0 z-50">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
+            {/* Back to Dashboard Button */}
+            {status === 'authenticated' && (
+              <button
+                onClick={() => router.push('/dashboard/space')}
+                className="p-2 rounded-lg hover:bg-zinc-800 transition-colors group"
+                title="Back to Dashboard"
+              >
+                <ArrowLeft className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+              </button>
+            )}
             <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
               Chrona
             </h1>

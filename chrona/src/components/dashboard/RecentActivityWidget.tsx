@@ -141,9 +141,9 @@ export function RecentActivityWidget({ className = '' }: { className?: string })
         if (type === 'missing') {
             return {
                 border: 'border-red-500',
-                bg: 'bg-red-50',
-                text: 'text-red-700',
-                icon: 'text-red-500'
+                bg: 'bg-red-500/10',
+                text: 'text-red-300',
+                icon: 'text-red-400'
             };
         }
 
@@ -151,33 +151,32 @@ export function RecentActivityWidget({ className = '' }: { className?: string })
             case 'positive':
                 return {
                     border: 'border-green-500',
-                    bg: 'bg-green-50',
-                    text: 'text-green-700',
-                    icon: 'text-green-500'
+                    bg: 'bg-green-500/10',
+                    text: 'text-green-300',
+                    icon: 'text-green-400'
                 };
             case 'negative':
                 return {
                     border: 'border-red-500',
-                    bg: 'bg-red-50',
-                    text: 'text-red-700',
-                    icon: 'text-red-500'
+                    bg: 'bg-red-500/10',
+                    text: 'text-red-300',
+                    icon: 'text-red-400'
                 };
             default:
                 return {
                     border: 'border-blue-500',
-                    bg: 'bg-blue-50',
-                    text: 'text-blue-700',
-                    icon: 'text-blue-500'
+                    bg: 'bg-blue-500/10',
+                    text: 'text-blue-300',
+                    icon: 'text-blue-400'
                 };
         }
     };
 
     if (loading) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                <div className="flex items-center justify-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
                 </div>
             </div>
         );
@@ -185,59 +184,57 @@ export function RecentActivityWidget({ className = '' }: { className?: string })
 
     if (error) {
         return (
-            <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-                <div className="flex items-center justify-center h-full text-red-500">
-                    <p>{error}</p>
+            <div className={`space-y-3 ${className}`}>
+                <div className="flex items-center justify-center h-64 text-red-400">
+                    <p className="text-sm">{error}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={`bg-white rounded-xl shadow-lg p-6 border border-gray-200 h-96 ${className}`}>
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                <Activity className="w-5 h-5 text-gray-500" />
+        <div className={`space-y-4 ${className}`}>
+            <div className="flex items-center justify-between">
+                <Activity className="w-5 h-5 text-gray-400" />
             </div>
-            
-            <div className="space-y-2 overflow-y-auto" style={{ height: 'calc(100% - 4rem)' }}>
+
+            <div className="space-y-2 max-h-80 overflow-y-auto">
                 {activities.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex items-center justify-center h-64 text-gray-400">
                         <div className="text-center">
-                            <Activity className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                            <p>No recent activity</p>
+                            <Activity className="w-12 h-12 mx-auto mb-2 text-gray-500" />
+                            <p className="text-sm">No recent activity</p>
                         </div>
                     </div>
                 ) : (
                     activities.map((activity) => {
                         const colors = getActivityColors(activity.status, activity.type);
                         const IconComponent = activity.icon;
-                        
+
                         return (
-                            <div 
-                                key={activity.id} 
-                                className={`p-3 border-l-4 rounded-r-lg ${colors.border} ${colors.bg}`}
+                            <div
+                                key={activity.id}
+                                className={`p-3 border-l-4 rounded-r-lg hover:bg-white/10 transition-colors ${colors.border} ${colors.bg}`}
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-3 flex-1 min-w-0">
                                         <IconComponent className={`w-4 h-4 mt-0.5 ${colors.icon} flex-shrink-0`} />
-                                        
+
                                         <div className="flex-1 min-w-0">
                                             <h4 className={`text-sm font-semibold ${colors.text} truncate`}>
                                                 {activity.title}
                                             </h4>
-                                            <p className="text-xs text-gray-600 truncate">
+                                            <p className="text-xs text-gray-400 truncate">
                                                 {activity.subtitle}
                                             </p>
                                             {activity.score && (
-                                                <p className="text-xs font-medium text-gray-700 mt-1">
+                                                <p className="text-xs font-medium text-white mt-1">
                                                     Score: {activity.score}
                                                 </p>
                                             )}
                                         </div>
                                     </div>
-                                    
+
                                     <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                                         {formatTimestamp(activity.timestamp)}
                                     </span>

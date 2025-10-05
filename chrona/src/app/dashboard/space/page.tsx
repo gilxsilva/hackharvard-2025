@@ -16,6 +16,11 @@ import GridOverlay from '@/components/grid/GridOverlay';
 import GridController from '@/components/grid/GridController';
 import type { Position } from '@/hooks/useDragAndDrop';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import CalendarWidget from '@/components/widgets/CalendarWidget';
+import { MissingAssignmentsWidget } from '@/components/dashboard/MissingAssignmentsWidget';
+import { GradeAnalyticsWidget } from '@/components/dashboard/GradeAnalyticsWidget';
+import { CourseWorkloadWidget } from '@/components/dashboard/CourseWorkloadWidget';
+import { RecentActivityWidget } from '@/components/dashboard/RecentActivityWidget';
 
 // Mock data
 const mockAssignments = [
@@ -226,10 +231,10 @@ function SpaceDashboardContent() {
   const [currentLayout, setCurrentLayout] = useState<LayoutMode>('orbital');
   const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
 
-  const widgetIds = ['courses', 'assignments', 'grades', 'stats'];
+  const widgetIds = ['courses', 'assignments', 'grades', 'stats', 'calendar', 'missing', 'analytics', 'workload', 'activity'];
 
   // Calculate orbital positions (responsive)
-  const getPosition = (index: number, total: number = 4) => {
+  const getPosition = (index: number, total: number = 9) => {
     const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 800;
     const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
     const radius = Math.min(centerX, centerY) * 0.5;
@@ -366,6 +371,86 @@ function SpaceDashboardContent() {
           snapFunction={isEnabled ? snapToGrid : undefined}
         >
           <StatsWidgetContent />
+        </Widget>
+      )}
+
+      {widgetPositions['calendar'] && (
+        <Widget
+          id="calendar"
+          title="Smart Calendar"
+          icon={<CalendarIcon className="w-5 h-5" />}
+          initialPosition={widgetPositions['calendar']}
+          glowColor="blue"
+          isZoomed={isFocused('calendar')}
+          onDoubleClick={() => toggleZoom('calendar')}
+          onPositionChange={(pos) => handlePositionChange('calendar', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <CalendarWidget />
+        </Widget>
+      )}
+
+      {widgetPositions['missing'] && (
+        <Widget
+          id="missing"
+          title="Missing Assignments"
+          icon={<Award className="w-5 h-5" />}
+          initialPosition={widgetPositions['missing']}
+          glowColor="red"
+          isZoomed={isFocused('missing')}
+          onDoubleClick={() => toggleZoom('missing')}
+          onPositionChange={(pos) => handlePositionChange('missing', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <MissingAssignmentsWidget />
+        </Widget>
+      )}
+
+      {widgetPositions['analytics'] && (
+        <Widget
+          id="analytics"
+          title="Grade Analytics"
+          icon={<BarChart3 className="w-5 h-5" />}
+          initialPosition={widgetPositions['analytics']}
+          glowColor="green"
+          isZoomed={isFocused('analytics')}
+          onDoubleClick={() => toggleZoom('analytics')}
+          onPositionChange={(pos) => handlePositionChange('analytics', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <GradeAnalyticsWidget />
+        </Widget>
+      )}
+
+      {widgetPositions['workload'] && (
+        <Widget
+          id="workload"
+          title="Course Workload"
+          icon={<BookOpen className="w-5 h-5" />}
+          initialPosition={widgetPositions['workload']}
+          glowColor="purple"
+          isZoomed={isFocused('workload')}
+          onDoubleClick={() => toggleZoom('workload')}
+          onPositionChange={(pos) => handlePositionChange('workload', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <CourseWorkloadWidget />
+        </Widget>
+      )}
+
+      {widgetPositions['activity'] && (
+        <Widget
+          id="activity"
+          title="Recent Activity"
+          icon={<BarChart3 className="w-5 h-5" />}
+          initialPosition={widgetPositions['activity']}
+          glowColor="blue"
+          isZoomed={isFocused('activity')}
+          onDoubleClick={() => toggleZoom('activity')}
+          onPositionChange={(pos) => handlePositionChange('activity', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <RecentActivityWidget />
         </Widget>
       )}
     </>
