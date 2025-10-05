@@ -26,20 +26,13 @@ export function useIntroSequence(autoStart: boolean = true) {
   useEffect(() => {
     if (!autoStart || state.isSkipped) return;
 
-    // Check if intro has been shown in this session
-    const hasSeenIntro = sessionStorage.getItem('chrona-intro-seen');
-    if (hasSeenIntro === 'true') {
-      skip();
-      return;
-    }
-
     const timings = {
       'logo-appear': 1000,      // 0-1s: Logo appears
       'logo-pulse': 1000,       // 1-2s: Logo pulses
       'text-type': 500,         // 2-2.5s: Text types in
       'scatter': 1000,          // 2.5-3.5s: Particles scatter
-      'dashboard-fade': 500,    // 3.5-4s: Dashboard fades in
-    };
+      'dashboard-fade': 1200,   // 3.5-4.7s: Dashboard fades in (slower)
+    } as const;
 
     const phases: IntroPhase[] = ['logo-appear', 'logo-pulse', 'text-type', 'scatter', 'dashboard-fade'];
     let currentPhaseIndex = 0;
@@ -60,9 +53,8 @@ export function useIntroSequence(autoStart: boolean = true) {
               isSkipped: false,
               isComplete: true
             });
-            sessionStorage.setItem('chrona-intro-seen', 'true');
           }
-        }, timings[currentPhase]);
+        }, timings[currentPhase as keyof typeof timings]);
       }
     };
 

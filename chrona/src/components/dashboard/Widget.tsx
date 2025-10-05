@@ -34,11 +34,14 @@ export default function Widget({
 }: WidgetProps) {
   const { position, isDragging, handleMouseDown, handleMouseMove, handleMouseUp, setPosition } = useDragAndDrop(initialPosition, snapFunction);
   const widgetRef = useRef<HTMLDivElement>(null);
+  const prevPositionRef = useRef<Position>(initialPosition);
 
-  // Notify parent of position changes
+  // Notify parent of position changes only when position actually changes
   useEffect(() => {
-    if (onPositionChange) {
+    if (onPositionChange &&
+        (prevPositionRef.current.x !== position.x || prevPositionRef.current.y !== position.y)) {
       onPositionChange(position);
+      prevPositionRef.current = position;
     }
   }, [position, onPositionChange]);
 

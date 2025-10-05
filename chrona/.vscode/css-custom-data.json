@@ -1,0 +1,13 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@theme",
+      "description": "Tailwind CSS v4 theme configuration directive"
+    },
+    {
+      "name": "@import",
+      "description": "Import CSS files or packages"
+    }
+  ]
+}

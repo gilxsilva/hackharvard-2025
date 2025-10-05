@@ -46,10 +46,10 @@ body {
 }
 
 @keyframes fadeOut {
-  from {
+  0% {
     opacity: 1;
   }
-  to {
+  100% {
     opacity: 0;
   }
 }
@@ -116,11 +116,11 @@ body {
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.6s ease-out forwards;
+  animation: fadeIn 1.2s ease-out forwards;
 }
 
 .animate-fadeOut {
-  animation: fadeOut 0.6s ease-out forwards;
+  animation: fadeOut 1.2s ease-in-out forwards;
 }
 
 .animate-fadeInUp {

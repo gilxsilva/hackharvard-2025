@@ -8,7 +8,7 @@ import { ZoomProvider, useZoomContext } from '@/contexts/ZoomContext';
 import { NavigationProvider } from '@/contexts/NavigationContext';
 
 // Import existing widget components
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchUpcomingAssignments, fetchCanvasCourses, fetchOverallCourseGrades, type CanvasAssignment, type CanvasCourse, type CanvasCourseGrade } from '@/lib/canvasApi';
 import { useGridSnap } from '@/hooks/useGridSnap';
 import { applyLayout, type LayoutMode, type WidgetPosition } from '@/utils/layoutAlgorithms';
@@ -241,14 +241,14 @@ function SpaceDashboardContent() {
     };
   };
 
-  // Initialize widget positions
+  // Initialize widget positions on client only
   useEffect(() => {
     const initialPositions: Record<string, Position> = {};
     widgetIds.forEach((id, index) => {
       initialPositions[id] = getPosition(index);
     });
     setWidgetPositions(initialPositions);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-arrange function
   const handleAutoArrange = () => {
@@ -270,9 +270,15 @@ function SpaceDashboardContent() {
   };
 
   // Handle position change for individual widgets
-  const handlePositionChange = (id: string, position: Position) => {
-    setWidgetPositions(prev => ({ ...prev, [id]: position }));
-  };
+  const handlePositionChange = useCallback((id: string, position: Position) => {
+    setWidgetPositions(prev => {
+      // Only update if position actually changed
+      if (prev[id]?.x === position.x && prev[id]?.y === position.y) {
+        return prev;
+      }
+      return { ...prev, [id]: position };
+    });
+  }, []);
 
   // Keyboard shortcut for toggling grid snap
   useKeyboardShortcuts([
@@ -299,61 +305,69 @@ function SpaceDashboardContent() {
         onAutoArrange={handleAutoArrange}
       />
 
-      <Widget
-        id="courses"
-        title="My Courses"
-        icon={<BookOpen className="w-5 h-5" />}
-        initialPosition={widgetPositions['courses'] || getPosition(0)}
-        glowColor="green"
-        isZoomed={isFocused('courses')}
-        onDoubleClick={() => toggleZoom('courses')}
-        onPositionChange={(pos) => handlePositionChange('courses', pos)}
-        snapFunction={isEnabled ? snapToGrid : undefined}
-      >
-        <CoursesWidgetContent />
-      </Widget>
+      {widgetPositions['courses'] && (
+        <Widget
+          id="courses"
+          title="My Courses"
+          icon={<BookOpen className="w-5 h-5" />}
+          initialPosition={widgetPositions['courses']}
+          glowColor="green"
+          isZoomed={isFocused('courses')}
+          onDoubleClick={() => toggleZoom('courses')}
+          onPositionChange={(pos) => handlePositionChange('courses', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <CoursesWidgetContent />
+        </Widget>
+      )}
 
-      <Widget
-        id="assignments"
-        title="Upcoming Assignments"
-        icon={<CalendarIcon className="w-5 h-5" />}
-        initialPosition={widgetPositions['assignments'] || getPosition(1)}
-        glowColor="blue"
-        isZoomed={isFocused('assignments')}
-        onDoubleClick={() => toggleZoom('assignments')}
-        onPositionChange={(pos) => handlePositionChange('assignments', pos)}
-        snapFunction={isEnabled ? snapToGrid : undefined}
-      >
-        <AssignmentsWidgetContent />
-      </Widget>
+      {widgetPositions['assignments'] && (
+        <Widget
+          id="assignments"
+          title="Upcoming Assignments"
+          icon={<CalendarIcon className="w-5 h-5" />}
+          initialPosition={widgetPositions['assignments']}
+          glowColor="blue"
+          isZoomed={isFocused('assignments')}
+          onDoubleClick={() => toggleZoom('assignments')}
+          onPositionChange={(pos) => handlePositionChange('assignments', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <AssignmentsWidgetContent />
+        </Widget>
+      )}
 
-      <Widget
-        id="grades"
-        title="Course Grades"
-        icon={<Award className="w-5 h-5" />}
-        initialPosition={widgetPositions['grades'] || getPosition(2)}
-        glowColor="purple"
-        isZoomed={isFocused('grades')}
-        onDoubleClick={() => toggleZoom('grades')}
-        onPositionChange={(pos) => handlePositionChange('grades', pos)}
-        snapFunction={isEnabled ? snapToGrid : undefined}
-      >
-        <GradesWidgetContent />
-      </Widget>
+      {widgetPositions['grades'] && (
+        <Widget
+          id="grades"
+          title="Course Grades"
+          icon={<Award className="w-5 h-5" />}
+          initialPosition={widgetPositions['grades']}
+          glowColor="purple"
+          isZoomed={isFocused('grades')}
+          onDoubleClick={() => toggleZoom('grades')}
+          onPositionChange={(pos) => handlePositionChange('grades', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <GradesWidgetContent />
+        </Widget>
+      )}
 
-      <Widget
-        id="stats"
-        title="Weekly Overview"
-        icon={<BarChart3 className="w-5 h-5" />}
-        initialPosition={widgetPositions['stats'] || getPosition(3)}
-        glowColor="purple"
-        isZoomed={isFocused('stats')}
-        onDoubleClick={() => toggleZoom('stats')}
-        onPositionChange={(pos) => handlePositionChange('stats', pos)}
-        snapFunction={isEnabled ? snapToGrid : undefined}
-      >
-        <StatsWidgetContent />
-      </Widget>
+      {widgetPositions['stats'] && (
+        <Widget
+          id="stats"
+          title="Weekly Overview"
+          icon={<BarChart3 className="w-5 h-5" />}
+          initialPosition={widgetPositions['stats']}
+          glowColor="purple"
+          isZoomed={isFocused('stats')}
+          onDoubleClick={() => toggleZoom('stats')}
+          onPositionChange={(pos) => handlePositionChange('stats', pos)}
+          snapFunction={isEnabled ? snapToGrid : undefined}
+        >
+          <StatsWidgetContent />
+        </Widget>
+      )}
     </>
   );
 }
