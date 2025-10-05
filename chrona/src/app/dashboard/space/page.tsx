@@ -17,6 +17,7 @@ import GridController from '@/components/grid/GridController';
 import type { Position } from '@/hooks/useDragAndDrop';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import CalendarWidget from '@/components/widgets/CalendarWidget';
+import GoogleCalendarWidget from '@/components/dashboard/GoogleCalendarWidget';
 import { MissingAssignmentsWidget } from '@/components/dashboard/MissingAssignmentsWidget';
 import { GradeAnalyticsWidget } from '@/components/dashboard/GradeAnalyticsWidget';
 import { CourseWorkloadWidget } from '@/components/dashboard/CourseWorkloadWidget';
@@ -231,10 +232,10 @@ function SpaceDashboardContent() {
   const [currentLayout, setCurrentLayout] = useState<LayoutMode>('orbital');
   const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
 
-  const widgetIds = ['courses', 'assignments', 'grades', 'stats', 'calendar', 'missing', 'analytics', 'workload', 'activity'];
+  const widgetIds = ['courses', 'assignments', 'grades', 'stats', 'calendar', 'google-calendar', 'missing', 'analytics', 'workload', 'activity'];
 
   // Calculate orbital positions (responsive)
-  const getPosition = (index: number, total: number = 9) => {
+  const getPosition = (index: number, total: number = 10) => {
     const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 800;
     const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
     const radius = Math.min(centerX, centerY) * 0.5;
@@ -388,6 +389,14 @@ function SpaceDashboardContent() {
         >
           <CalendarWidget />
         </Widget>
+      )}
+
+      {widgetPositions['google-calendar'] && (
+        <GoogleCalendarWidget
+          id="google-calendar"
+          initialPosition={widgetPositions['google-calendar']}
+          onPositionChange={(pos) => handlePositionChange('google-calendar', pos)}
+        />
       )}
 
       {widgetPositions['missing'] && (
