@@ -82,11 +82,11 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
           onClick={() => setIsExpanded(true)}
         >
           {/* Outer glow rings */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 animate-pulse-glow blur-lg" />
-          <div className="absolute inset-1 rounded-full bg-gradient-to-r from-purple-500/30 to-blue-500/30 animate-breathing" />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cosmic-purple-600/20 to-cosmic-blue-600/20 animate-pulse-glow blur-lg" />
+          <div className="absolute inset-1 rounded-full bg-gradient-to-r from-cosmic-purple-500/30 to-cosmic-blue-500/30 animate-breathing" />
 
           {/* Main orb */}
-          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 shadow-xl flex items-center justify-center animate-breathing">
+          <div className="absolute inset-2 rounded-full bg-gradient-to-br from-cosmic-purple-500 via-cosmic-blue-500 to-cosmic-purple-600 shadow-xl flex items-center justify-center animate-breathing">
             <Sparkles className="w-6 h-6 text-white animate-pulse" />
           </div>
 
@@ -106,11 +106,11 @@ export default function CentralHub({ className = '' }: CentralHubProps) {
           />
           
           {/* Side Panel from Bottom Right */}
-          <div className="fixed bottom-6 right-24 w-96 max-h-[32rem] bg-gradient-to-br from-zinc-900/98 to-black/98 rounded-2xl border border-purple-500/30 shadow-[0_0_40px_rgba(139,92,246,0.4)] flex flex-col z-50 animate-slide-in-from-bottom">
+          <div className="fixed bottom-6 right-24 w-96 max-h-[32rem] bg-gradient-to-br from-zinc-900/98 to-black/98 rounded-2xl border border-cosmic-purple-500/30 shadow-button-cosmic flex flex-col z-50 animate-slide-in-from-bottom">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center animate-breathing">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cosmic-purple-500 to-cosmic-blue-500 flex items-center justify-center animate-breathing">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>

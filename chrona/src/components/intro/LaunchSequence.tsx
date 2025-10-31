@@ -46,7 +46,7 @@ export default function LaunchSequence({ children, enabled = true }: LaunchSeque
           <div className="flex flex-col items-center space-y-8">
             <ChronaLogo size={160} animate={false} className="animate-breathing" />
             <div className="relative h-12">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent animate-fade-in">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-cosmic-purple-400 via-cosmic-blue-400 to-cosmic-purple-400 bg-clip-text text-transparent animate-fade-in">
                 CHRONA
               </h1>
               <p className="text-center text-gray-400 mt-2 text-sm animate-fade-in delay-300">

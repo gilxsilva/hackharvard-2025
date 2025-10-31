@@ -25,13 +25,13 @@ export default function ChronaLogo({ className = '', animate = true, size = 120 
       style={{ width: size, height: size }}
     >
       {/* Outer glow ring */}
-      <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-purple-600/20 to-blue-600/20 blur-2xl transition-all duration-1000 ${
-        isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
+            <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-cosmic-purple-600/20 to-cosmic-blue-600/20 blur-2xl transition-all duration-1000 ${
+        animate ? 'animate-pulse' : ''
       }`} />
 
       {/* Main logo circle */}
-      <div className={`absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 flex items-center justify-center shadow-2xl transition-all duration-1000 ${
-        isVisible ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-80 rotate-45'
+      <div className={`absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-purple-500 via-cosmic-blue-500 to-cosmic-purple-600 flex items-center justify-center shadow-2xl transition-all duration-1000 ${
+        animate ? 'animate-breathing' : ''
       }`}>
         {/* Letter C */}
         <svg

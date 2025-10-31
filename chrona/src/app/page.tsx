@@ -62,7 +62,7 @@ export default function HomePage() {
 
         {/* Brand Name */}
         <div className="mb-16 animate-fade-in delay-300" style={{ transform: `translateY(${scrollY * 0.3}px)` }}>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4 text-center">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-cosmic-purple-400 via-cosmic-blue-400 to-cosmic-purple-400 bg-clip-text text-transparent mb-4 text-center">
             CHRONA
           </h1>
           <p className="text-center text-gray-400 text-lg">
@@ -100,7 +100,7 @@ export default function HomePage() {
             </div>
 
             {/* Glow effect on hover */}
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover:from-purple-500/20 group-hover:via-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300 -z-10 blur-xl"></div>
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cosmic-purple-500/0 via-cosmic-purple-500/0 to-cosmic-purple-500/0 group-hover:from-cosmic-purple-500/20 group-hover:via-cosmic-blue-500/20 group-hover:to-cosmic-purple-500/20 transition-all duration-300 -z-10 blur-xl"></div>
           </button>
         </div>
 
@@ -190,16 +190,16 @@ export default function HomePage() {
           <div className="text-center mt-20" style={{ opacity: Math.min(1, Math.max(0, (scrollY - 1000) / 200)) }}>
             <button
               onClick={handleSignIn}
-              className="group relative px-10 py-5 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-500 hover:via-blue-500 hover:to-purple-500 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:scale-110 shadow-[0_0_40px_rgba(139,92,246,0.4)] hover:shadow-[0_0_60px_rgba(139,92,246,0.8)] animate-pulse-glow"
+              className="group relative px-10 py-5 bg-gradient-to-r from-cosmic-purple-600 via-cosmic-blue-600 to-cosmic-purple-600 hover:from-cosmic-purple-500 hover:via-cosmic-blue-500 hover:to-cosmic-purple-500 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:scale-110 shadow-button-cosmic hover:shadow-button-cosmic-hover animate-pulse-glow"
             >
               <span className="relative z-10">Get Started Free</span>
               {/* Animated gradient border */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-md"></div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cosmic-purple-400 via-cosmic-blue-400 to-cosmic-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-md"></div>
               {/* Outer glow */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover:from-purple-400/40 group-hover:via-blue-400/40 group-hover:to-purple-400/40 transition-all duration-300 -z-20 blur-2xl scale-110"></div>
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cosmic-purple-500/0 via-cosmic-purple-500/0 to-cosmic-purple-500/0 group-hover:from-cosmic-purple-400/40 group-hover:via-cosmic-blue-400/40 group-hover:to-cosmic-purple-400/40 transition-all duration-300 -z-20 blur-2xl scale-110"></div>
             </button>
             <p className="text-gray-400 text-sm mt-4 animate-fade-in delay-200">
-              No credit card required • <span className="text-purple-400">Sign in with Google</span>
+              No credit card required • <span className="text-cosmic-purple-400">Sign in with Google</span>
             </p>
           </div>
         </div>

@@ -85,17 +85,17 @@ export default function Widget({
   }, [isZoomed, onDoubleClick]);
 
   const glowColors = {
-    purple: 'shadow-[0_0_30px_rgba(139,92,246,0.5)]',
-    blue: 'shadow-[0_0_30px_rgba(59,130,246,0.5)]',
-    red: 'shadow-[0_0_30px_rgba(239,68,68,0.5)]',
-    green: 'shadow-[0_0_30px_rgba(16,185,129,0.5)]'
+    purple: 'shadow-widget-glow-purple',
+    blue: 'shadow-widget-glow-blue',
+    red: 'shadow-widget-glow-red',
+    green: 'shadow-widget-glow-green'
   };
 
-  const hoverGlow = {
-    purple: 'hover:shadow-[0_0_50px_rgba(139,92,246,0.7)]',
-    blue: 'hover:shadow-[0_0_50px_rgba(59,130,246,0.7)]',
-    red: 'hover:shadow-[0_0_50px_rgba(239,68,68,0.7)]',
-    green: 'hover:shadow-[0_0_50px_rgba(16,185,129,0.7)]'
+  const hoverGlowColors = {
+    purple: 'hover:shadow-cosmic-glow-hover',
+    blue: 'hover:shadow-cosmic-glow-hover',
+    red: 'hover:shadow-cosmic-glow-hover',
+    green: 'hover:shadow-cosmic-glow-hover'
   };
 
   return (
@@ -107,7 +107,7 @@ export default function Widget({
         ${isDragging ? 'scale-105 rotate-1' : 'scale-100'}
         ${isDraggable && !isZoomed ? 'cursor-grab active:cursor-grabbing' : ''}
         ${glowColors[glowColor]}
-        ${!isZoomed ? hoverGlow[glowColor] : ''}
+        ${!isZoomed ? hoverGlowColors[glowColor] : ''}
         ${!isZoomed ? 'animate-float' : ''}
         ${className}
       `}

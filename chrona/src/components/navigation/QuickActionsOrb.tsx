@@ -97,7 +97,7 @@ export default function QuickActionsOrb({
       {/* Main FAB */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-purple-600 shadow-[0_0_40px_rgba(139,92,246,0.5)] hover:shadow-[0_0_60px_rgba(139,92,246,0.7)] transition-all duration-300 flex items-center justify-center group ${
+        className={`w-14 h-14 rounded-full bg-gradient-to-br from-cosmic-purple-600 via-cosmic-blue-600 to-cosmic-purple-600 shadow-button-cosmic hover:shadow-button-cosmic-hover transition-all duration-300 flex items-center justify-center group ${
           isExpanded ? 'rotate-45' : ''
         }`}
       >
@@ -109,7 +109,7 @@ export default function QuickActionsOrb({
       </button>
 
       {/* Glow Effect */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 blur-xl opacity-30 -z-10 animate-pulse" />
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cosmic-purple-600 to-cosmic-blue-600 blur-xl opacity-30 -z-10 animate-pulse" />
     </div>
   );
 }

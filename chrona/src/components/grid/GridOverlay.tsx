@@ -37,7 +37,7 @@ export default function GridOverlay({
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
-        ctx.strokeStyle = `rgba(139, 92, 246, ${opacity})`; // Purple grid
+        ctx.strokeStyle = `rgb(139 92 246 / ${opacity})`; // Purple grid
         ctx.lineWidth = 1;
         ctx.stroke();
       }

@@ -185,7 +185,7 @@ function GradesWidgetContent() {
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-xl border border-purple-500/20">
+      <div className="p-4 bg-gradient-to-br from-cosmic-purple-500/10 to-cosmic-blue-500/10 rounded-xl border border-cosmic-purple-500/20">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-400">Average Grade</span>
           <span className="font-bold text-2xl text-white">{calculateAverage()}</span>
