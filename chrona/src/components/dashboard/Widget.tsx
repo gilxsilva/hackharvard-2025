@@ -102,7 +102,7 @@ export default function Widget({
     <div
       ref={widgetRef}
       className={`
-        fixed rounded-2xl backdrop-blur-xl border border-white/10
+        fixed rounded-2xl backdrop-blur-xl border border-white/10 flex flex-col
         ${isZoomed ? 'inset-0 m-auto max-w-6xl max-h-[90vh] z-50' : ''}
         ${isDragging ? 'scale-105 rotate-1' : 'scale-100'}
         ${isDraggable && !isZoomed ? 'cursor-grab active:cursor-grabbing' : ''}
