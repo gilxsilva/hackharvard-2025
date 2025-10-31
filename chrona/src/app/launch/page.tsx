@@ -8,7 +8,6 @@ import ChronaLogo from '@/components/intro/ChronaLogo';
 import SpaceBackground from '@/components/dashboard/SpaceBackground';
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const [scrollY, setScrollY] = useState(0);
 

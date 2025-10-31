@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useRef, useEffect, useState } from 'react';
+import { ReactNode, useRef, useState } from 'react';
 import { TransformWrapper, TransformComponent, ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { ZoomIn, ZoomOut, Maximize2, Crosshair } from 'lucide-react';
 

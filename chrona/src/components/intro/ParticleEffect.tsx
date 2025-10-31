@@ -20,7 +20,7 @@ interface ParticleEffectProps {
 export default function ParticleEffect({ isActive, particleCount = 50 }: ParticleEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;

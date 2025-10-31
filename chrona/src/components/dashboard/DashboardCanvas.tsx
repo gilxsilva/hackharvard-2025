@@ -5,7 +5,7 @@ import SpaceBackground from './SpaceBackground';
 import CentralHub from './CentralHub';
 import CommandBar from '../navigation/CommandBar';
 import CommandPalette from '../navigation/CommandPalette';
-import QuickActionsOrb from '../navigation/QuickActionsOrb';
+
 import { useZoom } from '@/hooks/useZoom';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';

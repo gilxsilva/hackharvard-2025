@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Activity, CheckCircle, Clock, Award, FileText, AlertCircle } from 'lucide-react';
+import { Activity, Award, AlertCircle } from 'lucide-react';
 
 interface RecentGrade {
     assignment_name: string;

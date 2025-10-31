@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, BookOpen, Award, BarChart3, MessageCircle, Send } from 'lucide-react';
+import { Award, BookOpen, Calendar, BarChart3 } from 'lucide-react';
+
 import ChatBar from '@/components/ChatBar';
 import { fetchUpcomingAssignments, fetchCanvasCourses, fetchOverallCourseGrades, type CanvasAssignment, type CanvasCourse, type CanvasCourseGrade } from '@/lib/canvasApi';
 import { CourseWorkloadWidget } from '@/components/dashboard/CourseWorkloadWidget';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Grid3x3, Orbit, LayoutGrid, Sparkles, Grid2x2 } from 'lucide-react';
+import { Orbit, LayoutGrid, Sparkles, Grid2x2 } from 'lucide-react';
 import { LayoutMode } from '@/utils/layoutAlgorithms';
 
 interface GridControllerProps {
