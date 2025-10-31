@@ -7,7 +7,7 @@ import {
   createCourseCalendar,
   GoogleCalendarBatchResponse,
 } from '@/lib/googleCalendar';
-import { SyllabusEvent, CourseInfo } from '@/lib/gemini';
+import { SyllabusEvent, CourseInfo } from '@/lib/geminiApi';
 
 export interface AddEventsRequest {
   events: SyllabusEvent[];

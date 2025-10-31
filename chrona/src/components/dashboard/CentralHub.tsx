@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Sparkles, X, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { askGemini } from '@/lib/gemini';
+import { askGemini } from '@/lib/geminiApi';
 
 interface CentralHubProps {
   className?: string;

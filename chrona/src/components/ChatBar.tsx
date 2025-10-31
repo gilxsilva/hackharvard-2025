@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Send, MessageCircle } from 'lucide-react';
-import { askGemini } from '@/lib/gemini';
+import { askGemini } from '@/lib/geminiApi';
 
 export default function ChatBar() {
   const [query, setQuery] = useState<string>('');

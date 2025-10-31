@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Calendar as CalendarIcon, Upload, FileText, Clock, MapPin, User, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { callGeminiForEventParsing, SyllabusEvent, CourseInfo } from '@/lib/gemini';
+import { callGeminiForEventParsing, SyllabusEvent, CourseInfo } from '@/lib/geminiApi';
 import { getUserTimezone, getCommonTimezones } from '@/lib/googleCalendar';
 import * as pdfjsLib from 'pdfjs-dist';
 import MiniCalendar from '@/components/MiniCalendar';

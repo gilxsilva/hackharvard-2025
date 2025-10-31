@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Clock, MapPin, X, GraduationCap, FileText, BookOpen, Bell } from 'lucide-react';
-import { SyllabusEvent } from '@/lib/gemini';
+import { SyllabusEvent } from '@/lib/geminiApi';
 
 interface EventCardProps {
   event: SyllabusEvent;
