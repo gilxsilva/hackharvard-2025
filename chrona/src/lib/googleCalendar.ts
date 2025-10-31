@@ -1,4 +1,4 @@
-import { SyllabusEvent } from './gemini';
+import { SyllabusEvent } from './geminiApi';
 
 // Google Calendar API types
 export interface GoogleCalendarEvent {

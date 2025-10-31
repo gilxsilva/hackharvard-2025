@@ -103,7 +103,7 @@ src/
 
 ## Setup Guides
 
-- [Google Calendar Setup](./GOOGLE_CALENDAR_SETUP.md) - Detailed OAuth and API configuration
+- [Google Calendar Setup](./docs/GOOGLE_CALENDAR_SETUP.md) - Detailed OAuth and API configuration
 
 ## Roadmap
 

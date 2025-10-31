@@ -16,7 +16,7 @@ import GridOverlay from '@/components/grid/GridOverlay';
 import GridController from '@/components/grid/GridController';
 import type { Position } from '@/hooks/useDragAndDrop';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import CalendarWidget from '@/components/widgets/CalendarWidget';
+import CalendarWidget from '@/components/dashboard/CalendarWidget';
 import GoogleCalendarWidget from '@/components/dashboard/GoogleCalendarWidget';
 import { MissingAssignmentsWidget } from '@/components/dashboard/MissingAssignmentsWidget';
 import { GradeAnalyticsWidget } from '@/components/dashboard/GradeAnalyticsWidget';
