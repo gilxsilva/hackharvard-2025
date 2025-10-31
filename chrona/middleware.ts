@@ -4,8 +4,11 @@ import { NextResponse } from 'next/server';
 export default withAuth(
   function middleware(req) {
     // If user is authenticated and trying to access launch, redirect to dashboard
-    if (req.nextUrl.pathname === '/launch' && req.nextauth.token) {
-      return NextResponse.redirect(new URL('/dashboard/space', req.url));
+    if (req.nextauth.token) {
+      const pathname = req.nextUrl.pathname;
+      if (pathname === '/launch') {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
     }
 
     return NextResponse.next();

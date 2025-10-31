@@ -14,7 +14,7 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push('/dashboard/space');
+      router.push('/dashboard');
     }
   }, [status, router]);
 
@@ -26,7 +26,7 @@ export default function LoginPage() {
   }, []);
 
   const handleSignIn = () => {
-    signIn('google', { callbackUrl: '/dashboard/space' });
+    signIn('google', { callbackUrl: '/dashboard' });
   };
 
   if (status === 'loading') {

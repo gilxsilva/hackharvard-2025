@@ -363,7 +363,7 @@ export default function CalendarPage() {
             {/* Back to Dashboard Button */}
             {status === 'authenticated' && (
               <button
-                onClick={() => router.push('/dashboard/space')}
+                onClick={() => router.push('/dashboard')}
                 className="p-2 rounded-lg hover:bg-zinc-800 transition-colors group"
                 title="Back to Dashboard"
               >

@@ -132,7 +132,7 @@ CANVAS_API_TOKEN=your_canvas_token
 npm run dev
 ```
 
-Open http://localhost:3000/dashboard/space (or the port reported by Next) to view the Space Dashboard.
+Open http://localhost:3000/dashboard (or the port reported by Next) to view the Space Dashboard.
 
 ---
 
