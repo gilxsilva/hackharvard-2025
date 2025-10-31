@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Users, ExternalLink, RefreshCw } from 'lucide-react';
-import Widget from './Widget';
 
 interface GoogleCalendarEvent {
   id: string;
@@ -37,21 +36,13 @@ interface TodayEventsResponse {
 }
 
 interface GoogleCalendarWidgetProps {
-  id: string;
-  initialPosition: { x: number; y: number };
-  onPositionChange?: (position: { x: number; y: number }) => void;
+  id?: string;
   className?: string;
-  isZoomed?: boolean;
-  onDoubleClick?: () => void;
 }
 
 export default function GoogleCalendarWidget({
   id,
-  initialPosition,
-  onPositionChange,
-  className = '',
-  isZoomed = false,
-  onDoubleClick
+  className = ''
 }: GoogleCalendarWidgetProps) {
   const [events, setEvents] = useState<GoogleCalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,86 +215,74 @@ export default function GoogleCalendarWidget({
   });
 
   return (
-    <Widget
-      id={id}
-      title="📅 Today's Calendar"
-      initialPosition={initialPosition}
-      onPositionChange={onPositionChange}
-      className={className}
-      icon={<Calendar className="w-4 h-4 text-blue-400" />}
-      isZoomed={isZoomed}
-      onDoubleClick={onDoubleClick}
-      glowColor="blue"
-    >
-      <div className="h-full flex flex-col">
-        {/* Header with refresh button */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-white">
-              {loading ? 'Loading...' : `${events.length} event${events.length !== 1 ? 's' : ''}`}
-            </span>
-            <span className="text-xs text-gray-400">{todayDate}</span>
+    <div className="flex flex-col h-full">
+      {/* Header with refresh button */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-white">
+            {loading ? 'Loading...' : `${events.length} event${events.length !== 1 ? 's' : ''}`}
+          </span>
+          <span className="text-xs text-gray-400">{todayDate}</span>
+        </div>
+        
+        <button
+          onClick={fetchTodayEvents}
+          disabled={loading}
+          className="p-1 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
+          title="Refresh events"
+        >
+          <RefreshCw className={`w-4 h-4 text-gray-400 ${loading ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-h-0">
+        {error ? (
+          <div className="flex flex-col items-center justify-center h-full text-center py-8">
+            <Calendar className="w-8 h-8 text-red-400 mb-2" />
+            <p className="text-red-400 text-sm mb-2">Failed to load events</p>
+            <p className="text-gray-500 text-xs mb-3">{error}</p>
+            <button
+              onClick={fetchTodayEvents}
+              className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-md text-xs transition-colors"
+            >
+              Try Again
+            </button>
           </div>
-          
-          <button
-            onClick={fetchTodayEvents}
-            disabled={loading}
-            className="p-1 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
-            title="Refresh events"
-          >
-            <RefreshCw className={`w-4 h-4 text-gray-400 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {error ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <Calendar className="w-8 h-8 text-red-400 mb-2" />
-              <p className="text-red-400 text-sm mb-2">Failed to load events</p>
-              <p className="text-gray-500 text-xs mb-3">{error}</p>
-              <button
-                onClick={fetchTodayEvents}
-                className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-md text-xs transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : loading ? (
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="p-3 bg-white/5 rounded-lg animate-pulse">
-                  <div className="h-4 bg-white/10 rounded mb-2"></div>
-                  <div className="h-3 bg-white/5 rounded w-3/4"></div>
-                </div>
-              ))}
-            </div>
-          ) : events.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <Calendar className="w-8 h-8 text-gray-500 mb-2" />
-              <p className="text-gray-400 text-sm mb-1">No events today</p>
-              <p className="text-gray-500 text-xs">Enjoy your free time!</p>
-            </div>
-          ) : (
-            <div className="space-y-2 overflow-y-auto pr-1">
-              {events.map((event, index) => renderEventCard(event, index))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {lastUpdated && !loading && (
-          <div className="mt-3 pt-2 border-t border-white/10">
-            <p className="text-xs text-gray-500 text-center">
-              Last updated: {lastUpdated.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-              })}
-            </p>
+        ) : loading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="p-3 bg-white/5 rounded-lg animate-pulse">
+                <div className="h-4 bg-white/10 rounded mb-2"></div>
+                <div className="h-3 bg-white/5 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-8">
+            <Calendar className="w-8 h-8 text-gray-500 mb-2" />
+            <p className="text-gray-400 text-sm mb-1">No events today</p>
+            <p className="text-gray-500 text-xs">Enjoy your free time!</p>
+          </div>
+        ) : (
+          <div className="space-y-2 overflow-y-auto pr-1 max-h-80">
+            {events.map((event, index) => renderEventCard(event, index))}
           </div>
         )}
       </div>
-    </Widget>
+
+      {/* Footer */}
+      {lastUpdated && !loading && (
+        <div className="mt-3 pt-2 border-t border-white/10">
+          <p className="text-xs text-gray-500 text-center">
+            Last updated: {lastUpdated.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            })}
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

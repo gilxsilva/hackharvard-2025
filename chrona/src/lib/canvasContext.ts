@@ -11,31 +11,51 @@ export interface CanvasContext {
     lastUpdated: string;
 }
 
+// Helper function to make internal API calls
+async function fetchInternalAPI(endpoint: string): Promise<any[]> {
+    try {
+        // Construct the full URL for internal API calls
+        const baseUrl = process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : process.env.NEXTAUTH_URL || 'http://localhost:3000';
+
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+            headers: {
+                'User-Agent': 'Chrona-AI-Bot/1.0',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.warn(`🤖 Failed to fetch ${endpoint}: ${response.status} ${response.statusText}`);
+            return [];
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.warn(`🤖 Error fetching ${endpoint}:`, error);
+        return [];
+    }
+}
+
 export async function fetchCanvasContext(): Promise<CanvasContext> {
     try {
         console.log('🤖 ChatBot: Fetching Canvas context...');
 
-        // Fetch all Canvas data in parallel for speed
+        // Fetch all Canvas data in parallel
         const [
-            coursesResponse,
-            gradesResponse,
-            courseGradesResponse,
-            upcomingResponse,
-            missingResponse
+            courses,
+            grades,
+            courseGrades,
+            upcomingAssignments,
+            missingAssignments
         ] = await Promise.all([
-            fetch('/api/canvas/courses').catch(() => null),
-            fetch('/api/canvas/grades').catch(() => null),
-            fetch('/api/canvas/course-grades').catch(() => null),
-            fetch('/api/canvas/assignments/upcoming').catch(() => null),
-            fetch('/api/canvas/missing-assignments').catch(() => null)
+            fetchInternalAPI('/api/canvas/courses'),
+            fetchInternalAPI('/api/canvas/grades'),
+            fetchInternalAPI('/api/canvas/course-grades'),
+            fetchInternalAPI('/api/canvas/assignments/upcoming'),
+            fetchInternalAPI('/api/canvas/missing-assignments')
         ]);
-
-        // Parse successful responses
-        const courses = coursesResponse?.ok ? await coursesResponse.json() : [];
-        const grades = gradesResponse?.ok ? await gradesResponse.json() : [];
-        const courseGrades = courseGradesResponse?.ok ? await courseGradesResponse.json() : [];
-        const upcomingAssignments = upcomingResponse?.ok ? await upcomingResponse.json() : [];
-        const missingAssignments = missingResponse?.ok ? await missingResponse.json() : [];
 
         console.log('🤖 ChatBot: Canvas context loaded:', {
             courses: courses.length,

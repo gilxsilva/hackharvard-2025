@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Settings, Grid3x3, Calendar, Bell, HelpCircle } from 'lucide-react';
+import { User, Settings, Grid3x3, Calendar, Bell, HelpCircle, Bot, Layout } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
 interface CommandBarProps {
@@ -10,59 +10,40 @@ interface CommandBarProps {
   onOpenWidgetManager?: () => void;
   onToggleCalendar?: () => void;
   onOpenHelp?: () => void;
+  onToggleAI?: () => void;
 }
 
 export default function CommandBar({
   onOpenSettings,
   onOpenWidgetManager,
   onToggleCalendar,
-  onOpenHelp
+  onOpenHelp,
+  onToggleAI
 }: CommandBarProps) {
   const { data: session } = useSession();
   const router = useRouter();
-  const [isVisible, setIsVisible] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      // Show bar when mouse is near top (within 30px)
-      if (e.clientY < 30) {
-        setIsVisible(true);
-        clearTimeout(timeout);
-      } else if (e.clientY > 80) {
-        // Auto-hide after 3s when mouse moves away
-        timeout = setTimeout(() => setIsVisible(false), 3000);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(timeout);
-    };
-  }, []);
+  
+  // Detect current route to show appropriate navigation
+  const isOnCalendar = typeof window !== 'undefined' && window.location.pathname === '/calendar';
 
   const navItems = [
     { icon: User, label: 'Profile', action: () => setShowProfileMenu(!showProfileMenu) },
-    { icon: Settings, label: 'Settings', action: onOpenSettings },
-    { icon: Grid3x3, label: 'Widgets', action: onOpenWidgetManager },
-    { icon: Calendar, label: 'Calendar', action: () => router.push('/calendar') },
-    { icon: Bell, label: 'Notifications', badge: 3 },
-    { icon: HelpCircle, label: 'Help', action: onOpenHelp }
+    { icon: Bot, label: 'AI Assistant', action: onToggleAI },
+    ...(onOpenWidgetManager && !isOnCalendar ? [{ icon: Layout, label: 'Customize Widgets', action: onOpenWidgetManager }] : []),
+    { 
+      icon: Calendar, 
+      label: isOnCalendar ? 'Dashboard' : 'Calendar', 
+      action: () => router.push(isOnCalendar ? '/dashboard' : '/calendar')
+    },
   ];
 
   return (
     <>
       {/* Command Bar */}
-      <div
-        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out ${
-          isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-3">
-          <div className="flex items-center justify-between px-6 py-3 bg-white/5 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-between">
             {/* Left: Branding */}
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-purple-500 to-cosmic-blue-500 flex items-center justify-center">
@@ -83,11 +64,6 @@ export default function CommandBar({
                     title={item.label}
                   >
                     <Icon className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
-                    {item.badge && (
-                      <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
                     {/* Tooltip */}
                     <span className="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                       {item.label}
@@ -115,13 +91,6 @@ export default function CommandBar({
               )}
             </div>
           </div>
-        </div>
-
-        {/* Keyboard Shortcut Hint */}
-        <div className="text-center mt-2">
-          <span className="text-xs text-white/40">
-            Press <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60">⌘K</kbd> for quick actions
-          </span>
         </div>
       </div>
 

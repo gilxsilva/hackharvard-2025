@@ -1,31 +1,22 @@
 'use client';
 
-import { Award, BookOpen, Calendar as CalendarIcon, BarChart3 } from 'lucide-react';
-import DashboardCanvas from '@/components/dashboard/DashboardCanvas';
-import Widget from '@/components/dashboard/Widget';
-import LaunchSequence from '@/components/intro/LaunchSequence';
-import { ZoomProvider, useZoomContext } from '@/contexts/ZoomContext';
-import { NavigationProvider } from '@/contexts/NavigationContext';
+import { Award, BookOpen, Calendar as CalendarIcon, BarChart3, Bot } from 'lucide-react';
+import SortableWidget from '@/components/dashboard/SortableWidget';
+import { SortableDashboard } from '@/contexts/SortableDashboard';
+import SpaceBackground from '@/components/dashboard/SpaceBackground';
+import CommandBar from '@/components/navigation/CommandBar';
 
 // Import existing widget components
 import { useState, useEffect, useCallback } from 'react';
 import { fetchUpcomingAssignments, fetchCanvasCourses, fetchOverallCourseGrades, type CanvasAssignment, type CanvasCourse, type CanvasCourseGrade } from '@/lib/canvasApi';
-import { useGridSnap } from '@/hooks/useGridSnap';
-import { applyLayout, type LayoutMode, type WidgetPosition } from '@/utils/layoutAlgorithms';
-import GridOverlay from '@/components/grid/GridOverlay';
-import GridController from '@/components/grid/GridController';
-import type { Position } from '@/hooks/useDragAndDrop';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import CalendarWidget from '@/components/dashboard/CalendarWidget';
 import GoogleCalendarWidget from '@/components/dashboard/GoogleCalendarWidget';
 import { MissingAssignmentsWidget } from '@/components/dashboard/MissingAssignmentsWidget';
 import { GradeAnalyticsWidget } from '@/components/dashboard/GradeAnalyticsWidget';
 import { CourseWorkloadWidget } from '@/components/dashboard/CourseWorkloadWidget';
 import { RecentActivityWidget } from '@/components/dashboard/RecentActivityWidget';
-import { WidgetManager, type WidgetConfig } from '@/components/dashboard/WidgetManager';
-import { LayoutDebugger } from '@/components/debug/LayoutDebugger';
-import { Minimap } from '@/components/canvas/Minimap';
-import { calculateLayoutBounds, calculateOptimalScale, doesLayoutOverflow, type ViewportInfo } from '@/utils/layoutBoundsCalculator';
+import ChatBar from '@/components/ChatBar';
+import WidgetSelector, { DEFAULT_WIDGETS, type WidgetConfig } from '@/components/dashboard/WidgetSelector';
 
 // Mock data
 const mockAssignments = [
@@ -229,383 +220,184 @@ function StatsWidgetContent() {
   );
 }
 
+// Widget order state
+const INITIAL_WIDGET_ORDER = [
+  'courses',
+  'assignments', 
+  'grades',
+  'stats',
+  'calendar',
+  'google-calendar',
+  'missing',
+  'analytics',
+  'workload',
+  'activity'
+];
+
 // Main Dashboard Component
-function SpaceDashboardContent() {
-  const { toggleZoom, isFocused } = useZoomContext();
-  const { config, snapToGrid, toggleGridSnap, toggleGuides, isEnabled, showGuides } = useGridSnap(false);
-  const [currentLayout, setCurrentLayout] = useState<LayoutMode>('grid');
-  const [widgetPositions, setWidgetPositions] = useState<Record<string, Position>>({});
-  const [layoutMemory, setLayoutMemory] = useState<Record<LayoutMode, Record<string, Position>>>({
-    orbital: {},
-    grid: {},
-    masonry: {},
-    spiral: {}
-  });
-  const [canvasScale, setCanvasScale] = useState(1);
-  const [viewportSize, setViewportSize] = useState({ width: 1920, height: 1080 });
-  const [isWidgetManagerOpen, setIsWidgetManagerOpen] = useState(false);
-  // Widget configurations with visibility state
-  const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>([
-    { id: 'courses', title: 'My Courses', visible: true, category: 'academic' },
-    { id: 'assignments', title: 'Upcoming Assignments', visible: true, category: 'academic' },
-    { id: 'grades', title: 'Course Grades', visible: true, category: 'academic' },
-    { id: 'stats', title: 'Weekly Overview', visible: true, category: 'analytics' },
-    { id: 'calendar', title: 'Smart Calendar', visible: true, category: 'calendar' },
-    { id: 'google-calendar', title: 'Google Calendar', visible: true, category: 'calendar' },
-    { id: 'missing', title: 'Missing Assignments', visible: true, category: 'academic' },
-    { id: 'analytics', title: 'Grade Analytics', visible: true, category: 'analytics' },
-    { id: 'workload', title: 'Course Workload', visible: true, category: 'analytics' },
-    { id: 'activity', title: 'Recent Activity', visible: true, category: 'analytics' },
-  ]);
+function SimpleDashboardContent() {
+  const [widgetOrder, setWidgetOrder] = useState<string[]>(INITIAL_WIDGET_ORDER);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [showWidgetSelector, setShowWidgetSelector] = useState(false);
+  const [widgetConfigs, setWidgetConfigs] = useState<WidgetConfig[]>(DEFAULT_WIDGETS);
 
-  const visibleWidgets = widgetConfigs.filter(w => w.visible);
-  const widgetIds = visibleWidgets.map(w => w.id);
-
-  // Calculate orbital positions (responsive)
-  const getPosition = (index: number, total: number) => {
-    const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 800;
-    const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 400;
-    const radius = Math.min(centerX, centerY) * 0.65; // Increased radius
-    const angle = (index * 2 * Math.PI) / total - Math.PI / 2;
-
-    return {
-      x: centerX + radius * Math.cos(angle) - 190,
-      y: centerY + radius * Math.sin(angle) - 210
-    };
-  };
-
-  // Track viewport size
-  useEffect(() => {
-    const updateViewport = () => {
-      setViewportSize({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
-
-    updateViewport();
-    window.addEventListener('resize', updateViewport);
-    return () => window.removeEventListener('resize', updateViewport);
+  // Handle widget reordering
+  const handleItemsChange = useCallback((newOrder: string[]) => {
+    setWidgetOrder(newOrder);
   }, []);
 
-  // Initialize widget positions on client only - recalculate when visible widgets change
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  // Handle AI chat toggle
+  const handleToggleAI = useCallback(() => {
+    setShowAIChat(!showAIChat);
+  }, [showAIChat]);
 
-    // Check if we have saved positions for this layout mode
-    const savedPositions = layoutMemory[currentLayout];
-    const hasSavedPositions = Object.keys(savedPositions).length === widgetIds.length;
+  // Handle widget selector toggle
+  const handleToggleWidgetSelector = useCallback(() => {
+    setShowWidgetSelector(!showWidgetSelector);
+  }, [showWidgetSelector]);
 
-    if (hasSavedPositions) {
-      // Restore from memory
-      setWidgetPositions(savedPositions);
-    } else {
-      // Calculate new positions using the current layout algorithm
-      const layoutParams = {
-        centerX: window.innerWidth / 2,
-        centerY: window.innerHeight / 2,
-        widgetWidth: 380,
-        widgetHeight: 420
-      };
+  // Handle widget configuration changes
+  const handleWidgetConfigChange = useCallback((newConfigs: WidgetConfig[]) => {
+    setWidgetConfigs(newConfigs);
+    
+    // Update widget order to only include enabled widgets
+    const enabledWidgetIds = newConfigs.filter(config => config.enabled).map(config => config.id);
+    const newOrder = widgetOrder.filter(id => enabledWidgetIds.includes(id));
+    
+    // Add any newly enabled widgets that aren't in the current order
+    const missingWidgets = enabledWidgetIds.filter(id => !newOrder.includes(id));
+    setWidgetOrder([...newOrder, ...missingWidgets]);
+  }, [widgetOrder]);
 
-      const newPositions = applyLayout(widgetIds, currentLayout, layoutParams);
-      const positionsMap: Record<string, Position> = {};
-      newPositions.forEach(pos => {
-        positionsMap[pos.id] = { x: pos.x, y: pos.y };
-      });
+  // Get currently enabled widgets
+  const enabledWidgets = widgetConfigs.filter(config => config.enabled);
+  const visibleWidgetOrder = widgetOrder.filter(id => 
+    enabledWidgets.some(config => config.id === id)
+  );
 
-      setWidgetPositions(positionsMap);
-
-      // Save to memory
-      setLayoutMemory(prev => ({
-        ...prev,
-        [currentLayout]: positionsMap
-      }));
-    }
-  }, [widgetIds.length, currentLayout]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-arrange function with overflow detection and adaptive scaling
-  const handleAutoArrange = (layoutMode?: LayoutMode) => {
-    if (typeof window === 'undefined') return;
-
-    const layoutToUse = layoutMode || currentLayout;
-    console.log('Auto-arranging with layout:', layoutToUse, 'widgetIds:', widgetIds);
-
-    const layoutParams = {
-      centerX: window.innerWidth / 2,
-      centerY: window.innerHeight / 2,
-      widgetWidth: 380,
-      widgetHeight: 420
+  const renderWidget = (id: string) => {
+    const widgets = {
+      courses: (
+        <SortableWidget id="courses" title="My Courses" icon={<BookOpen className="w-5 h-5" />} glowColor="green">
+          <CoursesWidgetContent />
+        </SortableWidget>
+      ),
+      assignments: (
+        <SortableWidget id="assignments" title="Upcoming Assignments" icon={<CalendarIcon className="w-5 h-5" />} glowColor="blue">
+          <AssignmentsWidgetContent />
+        </SortableWidget>
+      ),
+      grades: (
+        <SortableWidget id="grades" title="Course Grades" icon={<Award className="w-5 h-5" />} glowColor="purple">
+          <GradesWidgetContent />
+        </SortableWidget>
+      ),
+      stats: (
+        <SortableWidget id="stats" title="Weekly Overview" icon={<BarChart3 className="w-5 h-5" />} glowColor="purple">
+          <StatsWidgetContent />
+        </SortableWidget>
+      ),
+      calendar: (
+        <SortableWidget id="calendar" title="Smart Calendar" icon={<CalendarIcon className="w-5 h-5" />} glowColor="blue">
+          <CalendarWidget />
+        </SortableWidget>
+      ),
+      'google-calendar': (
+        <SortableWidget id="google-calendar" title="Google Calendar" icon={<CalendarIcon className="w-5 h-5" />} glowColor="green">
+          <GoogleCalendarWidget id="google-calendar" />
+        </SortableWidget>
+      ),
+      missing: (
+        <SortableWidget id="missing" title="Missing Assignments" icon={<Award className="w-5 h-5" />} glowColor="red">
+          <MissingAssignmentsWidget />
+        </SortableWidget>
+      ),
+      analytics: (
+        <SortableWidget id="analytics" title="Grade Analytics" icon={<BarChart3 className="w-5 h-5" />} glowColor="green">
+          <GradeAnalyticsWidget />
+        </SortableWidget>
+      ),
+      workload: (
+        <SortableWidget id="workload" title="Course Workload" icon={<BookOpen className="w-5 h-5" />} glowColor="purple">
+          <CourseWorkloadWidget />
+        </SortableWidget>
+      ),
+      activity: (
+        <SortableWidget id="activity" title="Recent Activity" icon={<BarChart3 className="w-5 h-5" />} glowColor="blue">
+          <RecentActivityWidget />
+        </SortableWidget>
+      )
     };
-
-    // Calculate new positions
-    const newPositions = applyLayout(widgetIds, layoutToUse, layoutParams);
-    console.log('New positions calculated:', newPositions);
-
-    // Check for overflow
-    const bounds = calculateLayoutBounds(newPositions, 380, 420);
-    const viewport: ViewportInfo = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      padding: 100
-    };
-
-    const overflows = doesLayoutOverflow(bounds, viewport);
-
-    if (overflows) {
-      // Calculate optimal scale to fit everything
-      const optimalScale = calculateOptimalScale(bounds, viewport);
-      setCanvasScale(optimalScale);
-
-      // Show notification about zoom adjustment
-      console.log(`Layout scaled to ${Math.round(optimalScale * 100)}% to fit`);
-    }
-
-    // Save positions to memory
-    const positionsMap: Record<string, Position> = {};
-    newPositions.forEach(pos => {
-      positionsMap[pos.id] = { x: pos.x, y: pos.y };
-    });
-
-    console.log('Setting widget positions:', positionsMap);
-    setWidgetPositions(positionsMap);
-
-    // Update layout memory for this mode
-    setLayoutMemory(prev => ({
-      ...prev,
-      [layoutToUse]: positionsMap
-    }));
+    return widgets[id as keyof typeof widgets];
   };
-
-  // Handle position change for individual widgets
-  const handlePositionChange = useCallback((id: string, position: Position) => {
-    setWidgetPositions(prev => {
-      // Only update if position actually changed
-      if (prev[id]?.x === position.x && prev[id]?.y === position.y) {
-        return prev;
-      }
-      return { ...prev, [id]: position };
-    });
-  }, []);
-
-  // Widget management handlers
-  const handleToggleWidget = (id: string) => {
-    setWidgetConfigs(prev =>
-      prev.map(w => w.id === id ? { ...w, visible: !w.visible } : w)
-    );
-  };
-
-  const handleToggleAll = (visible: boolean) => {
-    setWidgetConfigs(prev =>
-      prev.map(w => ({ ...w, visible }))
-    );
-  };
-
-  // Keyboard shortcut for toggling grid snap
-  useKeyboardShortcuts([
-    {
-      key: 'g',
-      action: toggleGridSnap,
-      description: 'Toggle grid snap mode'
-    }
-  ]);
 
   return (
-    <>
-      {/* Grid Overlay */}
-      <GridOverlay cellSize={config.cellSize} isVisible={showGuides} />
+    <div className="min-h-screen w-full bg-space-bg">
+      {/* Space Background */}
+      <SpaceBackground />
 
-      {/* Grid Controller */}
-      <GridController
-        isGridEnabled={isEnabled}
-        showGuides={showGuides}
-        currentLayout={currentLayout}
-        onToggleGrid={toggleGridSnap}
-        onToggleGuides={toggleGuides}
-        onChangeLayout={setCurrentLayout}
-        onAutoArrange={handleAutoArrange}
+      {/* Navigation Bar */}
+      <CommandBar 
+        onToggleAI={handleToggleAI} 
+        onOpenWidgetManager={handleToggleWidgetSelector}
       />
 
-      {/* Widget Manager */}
-      <WidgetManager
-        widgets={widgetConfigs}
-        onToggleWidget={handleToggleWidget}
-        onToggleAll={handleToggleAll}
-        isOpen={isWidgetManagerOpen}
-        onToggle={setIsWidgetManagerOpen}
-      />
+      {/* Dashboard Grid */}
+      <div className="pt-32 px-8 sm:px-12 lg:px-16">
+        <div className="max-w-[1200px] mx-auto">
+          <SortableDashboard items={visibleWidgetOrder} onItemsChange={handleItemsChange}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+              {visibleWidgetOrder.map((widgetId) => (
+                <div key={widgetId}>
+                  {renderWidget(widgetId)}
+                </div>
+              ))}
+            </div>
+          </SortableDashboard>
+        </div>
+      </div>
 
-      {/* Layout Debugger - Visual feedback for layout changes */}
-      <LayoutDebugger currentLayout={currentLayout} widgetCount={widgetIds.length} />
+      {/* AI Chat Panel */}
+      {showAIChat && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-lg">AI Assistant</h3>
+                  <p className="text-sm text-gray-400">Ask about your schedule, assignments, and more</p>
+                </div>
+              </div>
+              <button
+                onClick={handleToggleAI}
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
 
-
-      {widgetPositions['courses'] && widgetConfigs.find(w => w.id === 'courses')?.visible && (
-        <Widget
-          id="courses"
-          title="My Courses"
-          icon={<BookOpen className="w-5 h-5" />}
-          initialPosition={widgetPositions['courses']}
-          glowColor="green"
-          isZoomed={isFocused('courses')}
-          onDoubleClick={() => toggleZoom('courses')}
-          onPositionChange={(pos) => handlePositionChange('courses', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <CoursesWidgetContent />
-        </Widget>
+            {/* Chat Content */}
+            <div className="flex-1 overflow-hidden p-6">
+              <ChatBar />
+            </div>
+          </div>
+        </div>
       )}
 
-      {widgetPositions['assignments'] && widgetConfigs.find(w => w.id === 'assignments')?.visible && (
-        <Widget
-          id="assignments"
-          title="Upcoming Assignments"
-          icon={<CalendarIcon className="w-5 h-5" />}
-          initialPosition={widgetPositions['assignments']}
-          glowColor="blue"
-          isZoomed={isFocused('assignments')}
-          onDoubleClick={() => toggleZoom('assignments')}
-          onPositionChange={(pos) => handlePositionChange('assignments', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <AssignmentsWidgetContent />
-        </Widget>
-      )}
-
-      {widgetPositions['grades'] && widgetConfigs.find(w => w.id === 'grades')?.visible && (
-        <Widget
-          id="grades"
-          title="Course Grades"
-          icon={<Award className="w-5 h-5" />}
-          initialPosition={widgetPositions['grades']}
-          glowColor="purple"
-          isZoomed={isFocused('grades')}
-          onDoubleClick={() => toggleZoom('grades')}
-          onPositionChange={(pos) => handlePositionChange('grades', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <GradesWidgetContent />
-        </Widget>
-      )}
-
-      {widgetPositions['stats'] && widgetConfigs.find(w => w.id === 'stats')?.visible && (
-        <Widget
-          id="stats"
-          title="Weekly Overview"
-          icon={<BarChart3 className="w-5 h-5" />}
-          initialPosition={widgetPositions['stats']}
-          glowColor="purple"
-          isZoomed={isFocused('stats')}
-          onDoubleClick={() => toggleZoom('stats')}
-          onPositionChange={(pos) => handlePositionChange('stats', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <StatsWidgetContent />
-        </Widget>
-      )}
-
-      {widgetPositions['calendar'] && widgetConfigs.find(w => w.id === 'calendar')?.visible && (
-        <Widget
-          id="calendar"
-          title="Smart Calendar"
-          icon={<CalendarIcon className="w-5 h-5" />}
-          initialPosition={widgetPositions['calendar']}
-          glowColor="blue"
-          isZoomed={isFocused('calendar')}
-          onDoubleClick={() => toggleZoom('calendar')}
-          onPositionChange={(pos) => handlePositionChange('calendar', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <CalendarWidget />
-        </Widget>
-      )}
-
-      {widgetPositions['google-calendar'] && widgetConfigs.find(w => w.id === 'google-calendar')?.visible && (
-        <GoogleCalendarWidget
-          id="google-calendar"
-          initialPosition={widgetPositions['google-calendar']}
-          onPositionChange={(pos) => handlePositionChange('google-calendar', pos)}
-          isZoomed={isFocused('google-calendar')}
-          onDoubleClick={() => toggleZoom('google-calendar')}
+      {/* Widget Selector Modal */}
+      {showWidgetSelector && (
+        <WidgetSelector
+          widgets={widgetConfigs}
+          onWidgetsChange={handleWidgetConfigChange}
+          onClose={handleToggleWidgetSelector}
         />
       )}
-
-      {widgetPositions['missing'] && widgetConfigs.find(w => w.id === 'missing')?.visible && (
-        <Widget
-          id="missing"
-          title="Missing Assignments"
-          icon={<Award className="w-5 h-5" />}
-          initialPosition={widgetPositions['missing']}
-          glowColor="red"
-          isZoomed={isFocused('missing')}
-          onDoubleClick={() => toggleZoom('missing')}
-          onPositionChange={(pos) => handlePositionChange('missing', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <MissingAssignmentsWidget />
-        </Widget>
-      )}
-
-      {widgetPositions['analytics'] && widgetConfigs.find(w => w.id === 'analytics')?.visible && (
-        <Widget
-          id="analytics"
-          title="Grade Analytics"
-          icon={<BarChart3 className="w-5 h-5" />}
-          initialPosition={widgetPositions['analytics']}
-          glowColor="green"
-          isZoomed={isFocused('analytics')}
-          onDoubleClick={() => toggleZoom('analytics')}
-          onPositionChange={(pos) => handlePositionChange('analytics', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <GradeAnalyticsWidget />
-        </Widget>
-      )}
-
-      {widgetPositions['workload'] && widgetConfigs.find(w => w.id === 'workload')?.visible && (
-        <Widget
-          id="workload"
-          title="Course Workload"
-          icon={<BookOpen className="w-5 h-5" />}
-          initialPosition={widgetPositions['workload']}
-          glowColor="purple"
-          isZoomed={isFocused('workload')}
-          onDoubleClick={() => toggleZoom('workload')}
-          onPositionChange={(pos) => handlePositionChange('workload', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <CourseWorkloadWidget />
-        </Widget>
-      )}
-
-      {widgetPositions['activity'] && widgetConfigs.find(w => w.id === 'activity')?.visible && (
-        <Widget
-          id="activity"
-          title="Recent Activity"
-          icon={<BarChart3 className="w-5 h-5" />}
-          initialPosition={widgetPositions['activity']}
-          glowColor="blue"
-          isZoomed={isFocused('activity')}
-          onDoubleClick={() => toggleZoom('activity')}
-          onPositionChange={(pos) => handlePositionChange('activity', pos)}
-          snapFunction={isEnabled ? snapToGrid : undefined}
-        >
-          <RecentActivityWidget />
-        </Widget>
-      )}
-    </>
+    </div>
   );
 }
 
-export default function SpaceDashboardPage() {
-  return (
-    <LaunchSequence enabled={true}>
-      <NavigationProvider>
-        <ZoomProvider>
-          <DashboardCanvas>
-            <SpaceDashboardContent />
-          </DashboardCanvas>
-        </ZoomProvider>
-      </NavigationProvider>
-    </LaunchSequence>
-  );
-}
+export default SimpleDashboardContent;

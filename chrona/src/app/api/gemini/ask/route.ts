@@ -26,7 +26,15 @@ export async function POST(request: NextRequest) {
         }
 
         // Fetch comprehensive Canvas context
+        console.log('🤖 Fetching Canvas context for question:', question);
         const canvasContext = await fetchCanvasContext();
+        console.log('🤖 Canvas context summary:', {
+            courses: canvasContext.courses.length,
+            grades: canvasContext.grades.length,
+            courseGrades: canvasContext.courseGrades.length,
+            upcomingAssignments: canvasContext.upcomingAssignments.length,
+            missingAssignments: canvasContext.missingAssignments.length
+        });
 
         // Build comprehensive context prompt
         const contextPrompt = buildCanvasContextPrompt(question, canvasContext);
@@ -52,8 +60,10 @@ export async function POST(request: NextRequest) {
                     },
                 ],
                 generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 1000,
+                    temperature: 0.3, // Lower temperature for more focused responses
+                    maxOutputTokens: 400, // Reduced from 1000 to keep responses concise
+                    topP: 0.8, // More focused response generation
+                    topK: 20, // Limit vocabulary for more precise answers
                 },
             }),
         });
@@ -140,27 +150,26 @@ Data Last Updated: ${context.lastUpdated}
 ${question}
 
 === INSTRUCTIONS ===
-Please provide a helpful, accurate response based on the student's actual Canvas data above. You can:
+Provide a **concise, focused response** based on the student's Canvas data above. **Keep responses under 3 sentences when possible.**
 
-1. **Academic Performance**: Discuss grades, GPA trends, course performance
-2. **Assignment Management**: Help with upcoming deadlines, missing work, workload planning  
-3. **Course Information**: Provide details about enrolled courses, schedules
-4. **Study Planning**: Suggest priorities based on upcoming assignments and grades
-5. **Progress Tracking**: Analyze grade trends and academic progress
+**RESPONSE GUIDELINES:**
+1. **Direct & Brief** - Answer the specific question asked, don't elaborate beyond what's needed
+2. **Data-Driven** - Use actual numbers, dates, and course names from the Canvas data
+3. **Action-Oriented** - When relevant, provide 1-2 specific next steps
+4. **Academic Focus** - Stay on topic about grades, assignments, courses, or study planning
 
-**FORMATTING REQUIREMENTS:**
-- Use **bold text** for important information, course names, grades, and key points
-- Use *italic text* for emphasis, suggestions, and secondary information
-- Use bullet points (•) for lists and organized information
-- Use numbers (1., 2., 3.) for step-by-step instructions or rankings
-- Include emojis when appropriate: 📊 for grades, 📚 for courses, ⏰ for deadlines, 📝 for assignments, ⚠️ for warnings, 🎉 for good news
-- Use \`code blocks\` for technical terms or specific values
-- Structure responses with clear headings using ## or ### when appropriate
-- Keep paragraphs concise and scannable
+**FORMATTING (use sparingly):**
+- **Bold** for key information (grades, due dates, course names)
+- Bullet points (•) only for lists of 2+ items
+- Emojis: 📊 grades, 📚 courses, ⏰ deadlines, 📝 assignments, ⚠️ warnings
 
-Be conversational, supportive, and specific. Use the actual data provided. If asked about something not in the data, explain what information you do have access to.
+**FORBIDDEN:**
+- Long explanations or background information
+- Multiple paragraphs unless absolutely necessary
+- Repetitive information or obvious statements
+- Academic advice unless specifically requested
 
-If the question is completely unrelated to academics, politely redirect to academic topics while being friendly.
+If asked about non-academic topics, redirect briefly: "I'm focused on your academics. What would you like to know about your courses, grades, or assignments?"
 `;
 };
 
