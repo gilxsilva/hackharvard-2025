@@ -1,7 +1,7 @@
 // Import comprehensive types from the types directory
-import type { 
-    CanvasAssignment as FullCanvasAssignment, 
-    CanvasCourse as FullCanvasCourse, 
+import type {
+    CanvasAssignment as FullCanvasAssignment,
+    CanvasCourse as FullCanvasCourse,
     CanvasSubmission as FullCanvasSubmission
 } from '@/types/api';
 
