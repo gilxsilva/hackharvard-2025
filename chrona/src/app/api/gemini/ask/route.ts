@@ -111,7 +111,7 @@ ${context.courseGrades.map(grade => `
 📝 UPCOMING ASSIGNMENTS (Next 10):
 ${context.upcomingAssignments.slice(0, 10).map(assignment => `
   • ${assignment.name}
-    Course: ${assignment.course_code}
+    Course: ${assignment.course_name}
     Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}
     Points: ${assignment.points_possible || 0}
 `).join('')}
@@ -119,7 +119,7 @@ ${context.upcomingAssignments.slice(0, 10).map(assignment => `
 ⚠️  MISSING ASSIGNMENTS (${context.missingAssignments.length} total):
 ${context.missingAssignments.slice(0, 5).map(assignment => `
   • ${assignment.name}
-    Course: ${assignment.course_code}
+    Course: ${assignment.course_name}
     Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}
     Points: ${assignment.points_possible || 0}
 `).join('')}
@@ -187,7 +187,7 @@ const generateEnhancedFallbackResponse = (
     if (lowerQuestion.includes('assignment') || lowerQuestion.includes('due') || lowerQuestion.includes('homework')) {
         if (context.upcomingAssignments.length > 0) {
             const upcomingInfo = context.upcomingAssignments.slice(0, 3)
-                .map(assignment => `• **${assignment.name}** (*${assignment.course_code}*) - ⏰ Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}`)
+                .map(assignment => `• **${assignment.name}** (*${assignment.course_name}*) - ⏰ Due: ${assignment.due_at ? new Date(assignment.due_at).toLocaleDateString() : 'No due date'}`)
                 .join('\n');
             return `📝 **Your Upcoming Assignments:**\n\n${upcomingInfo}`;
         }
@@ -198,7 +198,7 @@ const generateEnhancedFallbackResponse = (
     if (lowerQuestion.includes('missing') || lowerQuestion.includes('late')) {
         if (context.missingAssignments.length > 0) {
             const missingInfo = context.missingAssignments.slice(0, 3)
-                .map(assignment => `• **${assignment.name}** (*${assignment.course_code}*)`)
+                .map(assignment => `• **${assignment.name}** (*${assignment.course_name}*)`)
                 .join('\n');
             return `⚠️ **Missing Assignments** (${context.missingAssignments.length} total):\n\n${missingInfo}`;
         }

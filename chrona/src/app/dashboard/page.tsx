@@ -136,7 +136,7 @@ function CoursesWidget() {
 }
 
 function AssignmentsWidget() {
-  const [assignments, setAssignments] = useState<(CanvasAssignment & { course_name: string })[]>([]);
+  const [assignments, setAssignments] = useState<CanvasAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -234,7 +234,7 @@ function AssignmentsWidget() {
             return (
               <div key={assignment.id} className="p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors border-l-4 border-green-500">
                 <div className="font-medium text-gray-800">{assignment.name}</div>
-                <div className="text-sm text-gray-600 mt-1">{assignment.course_name} • Canvas</div>
+                <div className="text-sm text-gray-600 mt-1">{assignment.course_name || 'Canvas'} • Canvas</div>
                 <div className={`text-xs mt-1 ${isUrgent ? 'text-red-600 font-medium' : 'text-blue-600'}`}>
                   Due {formatDueDate(assignment.due_at!)} ({daysUntil} day{daysUntil !== 1 ? 's' : ''})
                   {assignment.points_possible && ` • ${assignment.points_possible} points`}

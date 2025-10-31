@@ -1,11 +1,13 @@
 // Enhanced Canvas data fetcher for AI chatbot context
+import type { CanvasCourse, CanvasGrade, CanvasCourseGrade, CanvasAssignment } from '@/types/api';
+
 export interface CanvasContext {
-    courses: any[];
-    grades: any[];
-    courseGrades: any[];
-    upcomingAssignments: any[];
-    missingAssignments: any[];
-    calendarEvents: any[];
+    courses: CanvasCourse[];
+    grades: CanvasGrade[];
+    courseGrades: CanvasCourseGrade[];
+    upcomingAssignments: CanvasAssignment[];
+    missingAssignments: CanvasAssignment[];
+    calendarEvents: any[]; // Keep as any for now since calendar events structure varies
     lastUpdated: string;
 }
 

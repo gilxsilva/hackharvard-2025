@@ -80,7 +80,7 @@ function CoursesWidgetContent() {
 }
 
 function AssignmentsWidgetContent() {
-  const [assignments, setAssignments] = useState<(CanvasAssignment & { course_name: string })[]>([]);
+  const [assignments, setAssignments] = useState<CanvasAssignment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ function AssignmentsWidgetContent() {
         return (
           <div key={assignment.id || index} className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors border-l-4 border-blue-500/50">
             <div className="font-medium text-white">{assignment.name || assignment.title}</div>
-            <div className="text-sm text-gray-400 mt-1">{assignment.course_name}</div>
+            <div className="text-sm text-gray-400 mt-1">{assignment.course_name || 'Canvas'}</div>
             <div className={`text-xs mt-1 ${isUrgent ? 'text-red-400 font-medium' : 'text-blue-400'}`}>
               Due in {daysUntil} days
             </div>

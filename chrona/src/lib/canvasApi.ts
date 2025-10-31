@@ -1,3 +1,11 @@
+// Import comprehensive types from the types directory
+import type { 
+    CanvasAssignment as FullCanvasAssignment, 
+    CanvasCourse as FullCanvasCourse, 
+    CanvasSubmission as FullCanvasSubmission
+} from '@/types/api';
+
+// Export simplified interfaces for backward compatibility
 export interface CanvasAssignment {
     id: number;
     name: string;
@@ -6,6 +14,9 @@ export interface CanvasAssignment {
     points_possible: number;
     course_id: number;
     html_url: string;
+    // Additional fields from API responses
+    course_name?: string;
+    course_code?: string;
 }
 
 export interface CanvasCourse {
@@ -86,10 +97,10 @@ export const fetchUpcomingAssignments = async () => {
             throw new Error(`Canvas API error: ${response.status} ${errorData.error || response.statusText}`);
         }
 
-        const upcomingAssignments = await response.json();
+        const upcomingAssignments: CanvasAssignment[] = await response.json();
 
-        upcomingAssignments.slice(0, 5).forEach((assignment: any, index: number) => {
-            console.log(`  ${index + 1}. ${assignment.name} (${assignment.course_name}) - Due: ${assignment.due_at} - Points: ${assignment.points_possible}`);
+        upcomingAssignments.slice(0, 5).forEach((assignment, index) => {
+            console.log(`  ${index + 1}. ${assignment.name} - Due: ${assignment.due_at} - Points: ${assignment.points_possible}`);
         });
 
         return upcomingAssignments;
