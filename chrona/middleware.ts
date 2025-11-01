@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server';
 
 export default withAuth(
   function middleware(req) {
-    // If user is authenticated and trying to access launch, redirect to dashboard
-    if (req.nextauth.token) {
-      const pathname = req.nextUrl.pathname;
-      if (pathname === '/launch') {
-        return NextResponse.redirect(new URL('/dashboard', req.url));
-      }
+    const pathname = req.nextUrl.pathname;
+    const callbackUrl = req.nextUrl.searchParams.get('callbackUrl');
+
+    // If user is authenticated and trying to access launch page
+    if (req.nextauth.token && pathname === '/launch') {
+      // If there's a callbackUrl, redirect there, otherwise go to dashboard
+      const redirectUrl = callbackUrl || '/dashboard';
+      return NextResponse.redirect(new URL(redirectUrl, req.url));
     }
 
     return NextResponse.next();
@@ -19,7 +21,7 @@ export default withAuth(
       authorized: ({ req, token }) => {
         const pathname = req.nextUrl.pathname;
 
-        // Allow access to launch page without auth
+        // Allow access to launch page without auth (and with auth for redirects)
         if (pathname === '/launch') {
           return true;
         }

@@ -11,11 +11,23 @@ export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [scrollY, setScrollY] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check for authentication errors
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+      setError(errorParam);
+    }
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
     if (status === 'authenticated') {
-      router.push('/dashboard');
+      const urlParams = new URLSearchParams(window.location.search);
+      const callbackUrl = urlParams.get('callbackUrl') || '/dashboard';
+      router.push(callbackUrl);
     }
   }, [status, router]);
 
@@ -69,6 +81,15 @@ export default function LoginPage() {
             Your Cosmic Academic Dashboard
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg animate-fade-in">
+            <p className="text-red-400 text-sm text-center">
+              Authentication error: {error}. Please try again.
+            </p>
+          </div>
+        )}
 
         {/* Sign In Button */}
         <div className="animate-fade-in delay-600" style={{ transform: `translateY(${scrollY * 0.2}px)` }}>

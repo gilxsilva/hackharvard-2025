@@ -18,6 +18,11 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  // Add explicit pages configuration
+  pages: {
+    signIn: '/launch',
+    error: '/launch', // Error code passed in query string as ?error=
+  },
   callbacks: {
     async jwt({ token, account, user }) {
       // Initial sign in - persist the OAuth tokens
@@ -41,6 +46,13 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string;
       session.error = token.error as string | undefined;
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   // Remove custom signIn page - use NextAuth default
