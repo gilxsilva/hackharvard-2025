@@ -56,7 +56,12 @@ export async function GET() {
         }
 
         const courses: CanvasCourse[] = await coursesResponse.json();
-        const allGrades: any[] = [];
+        const allGrades: Array<{
+            assignment: CanvasAssignment;
+            submission: CanvasSubmission;
+            course_name: string;
+            course_code: string;
+        }> = [];
 
         // Fetch assignments with submissions for each course
         for (const course of courses) {

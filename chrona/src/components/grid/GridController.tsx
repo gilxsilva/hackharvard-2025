@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Orbit, LayoutGrid, Sparkles, Grid2x2 } from 'lucide-react';
 import { LayoutMode } from '@/utils/layoutAlgorithms';
 
@@ -22,7 +23,7 @@ export default function GridController({
   onChangeLayout,
   onAutoArrange
 }: GridControllerProps) {
-  const layouts: Array<{ mode: LayoutMode; icon: any; label: string }> = [
+  const layouts: Array<{ mode: LayoutMode; icon: React.ComponentType<{ className?: string }>; label: string }> = [
     { mode: 'orbital', icon: Orbit, label: 'Orbital' },
     { mode: 'masonry', icon: LayoutGrid, label: 'Masonry' },
     { mode: 'spiral', icon: Sparkles, label: 'Spiral' },

@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Upload, FileText, Clock, MapPin, User, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, Upload, FileText, Clock, MapPin, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { useSession, signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { callGeminiForEventParsing, SyllabusEvent, CourseInfo } from '@/lib/geminiApi';
 import { getUserTimezone, getCommonTimezones } from '@/lib/googleCalendar';
-import * as pdfjsLib from 'pdfjs-dist';
+// PDF.js will be dynamically imported to avoid SSR issues
 import MiniCalendar from '@/components/MiniCalendar';
 import EventCard from '@/components/EventCard';
 import CommandBar from '@/components/navigation/CommandBar';
@@ -76,14 +75,17 @@ const formatEventTitle = (title: string, courseCode?: string): string => {
   return `${prefix} ${title}`;
 };
 
-// Set up PDF.js worker - serve from local public folder
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf/pdf.worker.min.mjs';
-}
-
 // Helper function to extract text from PDF using PDF.js
 async function extractTextFromPDF(file: File): Promise<string> {
   console.log('📄 Starting PDF extraction for:', file.name);
+
+  // Dynamic import to avoid SSR issues
+  const pdfjsLib = await import('pdfjs-dist');
+  
+  // Set up PDF.js worker - serve from local public folder
+  if (typeof window !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf/pdf.worker.min.mjs';
+  }
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -106,7 +108,7 @@ async function extractTextFromPDF(file: File): Promise<string> {
           const page = await pdf.getPage(pageNum);
           const textContent = await page.getTextContent();
           const pageText = textContent.items
-            .map((item) => ('str' in item ? item.str : ''))
+            .map((item: unknown) => (typeof item === 'object' && item && 'str' in item ? (item as { str: string }).str : ''))
             .join(' ');
 
           fullText += pageText + '\n';
@@ -154,7 +156,6 @@ async function extractTextFromTXT(file: File): Promise<string> {
 
 export default function CalendarPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [step, setStep] = useState(1); // 1: Upload, 2: Review, 3: Confirm
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -309,7 +310,7 @@ export default function CalendarPage() {
           const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
           dates.add(dateObj.toISOString().split('T')[0]);
         }
-      } catch (e) {
+      } catch (_e) {
         // Skip invalid dates
       }
     });
@@ -325,7 +326,7 @@ export default function CalendarPage() {
             const eventDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
             return eventDate.toISOString().split('T')[0] === selectedDate.toISOString().split('T')[0];
           }
-        } catch (e) {
+        } catch (_e) {
           return false;
         }
         return false;
@@ -369,7 +370,7 @@ export default function CalendarPage() {
               <h1 className="text-3xl font-bold text-white">Semester Setup</h1>
             </div>
             <p className="text-zinc-400 text-lg">
-              Upload your syllabus. We'll add everything to your calendar automatically.
+              Upload your syllabus. We&apos;ll add everything to your calendar automatically.
             </p>
           </div>
 

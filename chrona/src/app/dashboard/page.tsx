@@ -103,7 +103,7 @@ function AssignmentsWidgetContent() {
   }
 
   const displayAssignments = assignments.length > 0 ? assignments : mockAssignments.map(a => ({
-    ...a as any,
+    ...a,
     name: a.title,
     due_at: a.dueDate,
     course_name: a.course
@@ -111,8 +111,8 @@ function AssignmentsWidgetContent() {
 
   return (
     <div className="space-y-3">
-      {displayAssignments.map((assignment: any, index: number) => {
-        const daysUntil = getDaysUntilDue(assignment.due_at || assignment.dueDate);
+      {displayAssignments.map((assignment: { name: string; due_at?: string | null; dueDate?: string; course_name?: string; course?: string; id?: number; title?: string }, index: number) => {
+        const daysUntil = getDaysUntilDue(assignment.due_at || assignment.dueDate || '');
         const isUrgent = daysUntil <= 2;
 
         return (

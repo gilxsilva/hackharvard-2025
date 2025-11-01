@@ -9,6 +9,7 @@ import SpaceBackground from '@/components/dashboard/SpaceBackground';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [scrollY, setScrollY] = useState(0);
 
   // Redirect if already authenticated

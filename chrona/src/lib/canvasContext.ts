@@ -7,12 +7,12 @@ export interface CanvasContext {
     courseGrades: CanvasCourseGrade[];
     upcomingAssignments: CanvasAssignment[];
     missingAssignments: CanvasAssignment[];
-    calendarEvents: any[]; // Keep as any for now since calendar events structure varies
+    calendarEvents: Array<{ id: string; title: string; date: string }>; // Basic calendar event structure
     lastUpdated: string;
 }
 
 // Helper function to make internal API calls
-async function fetchInternalAPI(endpoint: string): Promise<any[]> {
+async function fetchInternalAPI(endpoint: string): Promise<unknown[]> {
     try {
         // Construct the full URL for internal API calls
         const baseUrl = process.env.VERCEL_URL
@@ -66,11 +66,11 @@ export async function fetchCanvasContext(): Promise<CanvasContext> {
         });
 
         return {
-            courses,
-            grades,
-            courseGrades,
-            upcomingAssignments,
-            missingAssignments,
+            courses: courses as CanvasCourse[],
+            grades: grades as CanvasGrade[],
+            courseGrades: courseGrades as CanvasCourseGrade[],
+            upcomingAssignments: upcomingAssignments as CanvasAssignment[],
+            missingAssignments: missingAssignments as CanvasAssignment[],
             calendarEvents: [], // TODO: Add calendar events if needed
             lastUpdated: new Date().toISOString()
         };

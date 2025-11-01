@@ -55,7 +55,12 @@ export async function GET() {
         }
 
         const courses: CanvasCourse[] = await coursesResponse.json();
-        const missingAssignments: any[] = [];
+        const missingAssignments: Array<CanvasAssignment & {
+            course_name: string;
+            course_code: string;
+            urgency: string;
+            days_until_due: number | null;
+        }> = [];
 
         // Fetch assignments for each course
         for (const course of courses) {

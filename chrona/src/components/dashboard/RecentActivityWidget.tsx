@@ -1,19 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, Award, AlertCircle } from 'lucide-react';
-
-interface RecentGrade {
-    assignment_name: string;
-    course_code: string;
-    course_name: string;
-    score: number | null;
-    points_possible: number;
-    graded_at: string;
-    grade: string | null;
-    late: boolean;
-    missing: boolean;
-}
 
 interface RecentActivity {
     id: string;
@@ -23,7 +11,7 @@ interface RecentActivity {
     timestamp: string;
     status: 'positive' | 'neutral' | 'negative';
     score?: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
 }
 
 export function RecentActivityWidget({ className = '' }: { className?: string }) {
@@ -54,16 +42,21 @@ export function RecentActivityWidget({ className = '' }: { className?: string })
                 // Get recent grades (last 2 weeks)
                 const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
                 const recentGrades = grades
-                    .filter((grade: any) => {
+                    .filter((grade: { submission: { graded_at: string | null } }) => {
                         const gradedAt = grade.submission.graded_at;
                         return gradedAt && new Date(gradedAt) > twoWeeksAgo;
                     })
-                    .sort((a: any, b: any) => 
+                    .sort((a: { submission: { graded_at: string } }, b: { submission: { graded_at: string } }) => 
                         new Date(b.submission.graded_at).getTime() - new Date(a.submission.graded_at).getTime()
                     )
                     .slice(0, 8);
 
-                recentGrades.forEach((grade: any) => {
+                recentGrades.forEach((grade: { 
+                    submission: { score: number; graded_at: string }; 
+                    assignment: { points_possible: number; name: string; id: number }; 
+                    course_name: string; 
+                    course_code: string;
+                }) => {
                     const score = grade.submission.score;
                     const possible = grade.assignment.points_possible;
                     const percentage = possible > 0 ? (score / possible) * 100 : 0;
@@ -89,7 +82,7 @@ export function RecentActivityWidget({ className = '' }: { className?: string })
             if (missingResponse.ok) {
                 const missing = await missingResponse.json();
                 
-                missing.slice(0, 5).forEach((assignment: any) => {
+                missing.slice(0, 5).forEach((assignment: { id: number; name: string; course_code: string; due_at: string | null }) => {
                     activities.push({
                         id: `missing-${assignment.id}`,
                         type: 'missing',

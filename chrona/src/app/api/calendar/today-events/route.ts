@@ -27,13 +27,13 @@ export interface GoogleCalendarEventSimple {
   }>;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('📅 [API] Fetching today\'s calendar events...');
 
     // Get the user's session
     const session = await getServerSession(authOptions);
-    
+
     if (!session || !session.accessToken) {
       console.error('❌ [API] No session or access token');
       return NextResponse.json(
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     const timeMin = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const timeMax = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-    
+
     // Format dates for Google Calendar API (RFC3339 format)
     const timeMinISO = timeMin.toISOString();
     const timeMaxISO = timeMax.toISOString();
@@ -87,14 +87,14 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ [API] Google Calendar API error:', response.status, errorText);
-      
+
       if (response.status === 401) {
         return NextResponse.json(
           { error: 'Google Calendar access denied. Please check your permissions.' },
           { status: 401 }
         );
       }
-      
+
       return NextResponse.json(
         { error: `Google Calendar API error: ${response.status}` },
         { status: response.status }
@@ -106,11 +106,22 @@ export async function GET(request: NextRequest) {
 
     // Process and filter events
     const events: GoogleCalendarEventSimple[] = (data.items || [])
-      .filter((event: any) => {
+      .filter((event: { status?: string; start?: { dateTime?: string; date?: string } }) => {
         // Filter out cancelled events and events without start time
         return event.status !== 'cancelled' && (event.start?.dateTime || event.start?.date);
       })
-      .map((event: any) => ({
+      .map((event: {
+        id: string;
+        summary?: string;
+        description?: string;
+        location?: string;
+        start?: { dateTime?: string; date?: string; timeZone?: string };
+        end?: { dateTime?: string; date?: string; timeZone?: string };
+        status: string;
+        htmlLink: string;
+        colorId?: string;
+        attendees?: Array<{ email: string; displayName?: string; responseStatus: string }>;
+      }) => ({
         id: event.id,
         summary: event.summary || 'Untitled Event',
         description: event.description,
@@ -128,10 +139,10 @@ export async function GET(request: NextRequest) {
         status: event.status,
         htmlLink: event.htmlLink,
         colorId: event.colorId,
-        attendees: event.attendees?.map((attendee: any) => ({
+        attendees: event.attendees?.map((attendee: { email: string; displayName?: string; responseStatus: string }) => ({
           email: attendee.email,
           displayName: attendee.displayName,
-          responseStatus: attendee.responseStatus,
+          responseStatus: attendee.responseStatus as 'needsAction' | 'declined' | 'tentative' | 'accepted',
         })),
       }));
 
@@ -143,7 +154,7 @@ export async function GET(request: NextRequest) {
     });
 
     console.log('📋 [API] Returning processed events:', events.length);
-    
+
     return NextResponse.json({
       success: true,
       events,
@@ -154,7 +165,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ [API] Error fetching calendar events:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch calendar events',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

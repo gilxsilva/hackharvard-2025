@@ -78,10 +78,8 @@ export default function LaunchSequence({ children, enabled = true }: LaunchSeque
 
 // Helper component for ESC key handling
 function EscapeKeyHandler({ onEscape, enabled }: { onEscape: () => void; enabled: boolean }) {
-  if (typeof window === 'undefined') return null;
-
   useEffect(() => {
-    if (!enabled) return;
+    if (typeof window === 'undefined' || !enabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -92,6 +90,8 @@ function EscapeKeyHandler({ onEscape, enabled }: { onEscape: () => void; enabled
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [enabled, onEscape]);
+
+  if (typeof window === 'undefined') return null;
 
   return null;
 }

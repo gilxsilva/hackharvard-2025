@@ -113,7 +113,34 @@ ${text}
         console.log("✅ Gemini API responded successfully");
 
         const data: GeminiResponse = await response.json();
+        console.log('🔍 Gemini API response structure:', JSON.stringify(data, null, 2));
+
+        // Validate response structure
+        if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
+            console.error('❌ Invalid Gemini response: no candidates found');
+            return NextResponse.json(
+                { error: 'Invalid response from Gemini API: no candidates' },
+                { status: 500 }
+            );
+        }
+
+        if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+            console.error('❌ Invalid Gemini response: no content parts found');
+            return NextResponse.json(
+                { error: 'Invalid response structure from Gemini API: no content parts' },
+                { status: 500 }
+            );
+        }
+
         const rawResponse = data.candidates[0].content.parts[0].text;
+
+        if (!rawResponse) {
+            console.error('❌ Empty response from Gemini API');
+            return NextResponse.json(
+                { error: 'Empty response from Gemini API' },
+                { status: 500 }
+            );
+        }
 
         console.log("📨 Gemini raw response length:", rawResponse.length);
 

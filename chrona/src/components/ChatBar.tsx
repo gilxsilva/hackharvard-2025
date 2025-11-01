@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Send, MessageCircle, Bot, User } from 'lucide-react';
+import { useState } from 'react';
+import { Send, Bot, User } from 'lucide-react';
 import { askGemini } from '@/lib/geminiApi';
 
 interface ChatMessage {
@@ -126,19 +126,19 @@ export default function ChatBar() {
                 onClick={() => setQuery("What do I have today?")}
                 className="block w-full text-left px-3 py-2 text-sm text-purple-400 hover:text-purple-300 hover:bg-zinc-800/50 rounded-lg transition-colors"
               >
-                "What do I have today?"
+                &quot;What do I have today?&quot;
               </button>
               <button
                 onClick={() => setQuery("When is my next assignment due?")}
                 className="block w-full text-left px-3 py-2 text-sm text-purple-400 hover:text-purple-300 hover:bg-zinc-800/50 rounded-lg transition-colors"
               >
-                "When is my next assignment due?"
+                &quot;When is my next assignment due?&quot;
               </button>
               <button
                 onClick={() => setQuery("How are my grades looking?")}
                 className="block w-full text-left px-3 py-2 text-sm text-purple-400 hover:text-purple-300 hover:bg-zinc-800/50 rounded-lg transition-colors"
               >
-                "How are my grades looking?"
+                &quot;How are my grades looking?&quot;
               </button>
             </div>
           </div>

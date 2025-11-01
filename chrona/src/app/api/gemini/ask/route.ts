@@ -69,11 +69,31 @@ export async function POST(request: NextRequest) {
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`❌ Gemini API error ${response.status}:`, errorText);
             throw new Error(`Gemini API error: ${response.status}`);
         }
 
         const data: GeminiResponse = await response.json();
+        console.log('🔍 Gemini API response structure:', JSON.stringify(data, null, 2));
+
+        // Validate response structure
+        if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
+            console.error('❌ Invalid Gemini response: no candidates found');
+            throw new Error('Invalid response from Gemini API');
+        }
+
+        if (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+            console.error('❌ Invalid Gemini response: no content parts found');
+            throw new Error('Invalid response structure from Gemini API');
+        }
+
         const geminiResponse = data.candidates[0].content.parts[0].text;
+
+        if (!geminiResponse) {
+            console.error('❌ Empty response from Gemini API');
+            throw new Error('Empty response from Gemini API');
+        }
 
         return NextResponse.json({ response: geminiResponse });
     } catch (error) {

@@ -121,6 +121,8 @@ export function GradeAnalyticsWidget({ className = '' }: { className?: string })
                     const courseId = grade.assignment.course_id;
                     if (!acc[courseId]) {
                         acc[courseId] = {
+                            id: courseId,
+                            name: grade.course_name || 'Unknown Course',
                             course_code: grade.course_code || 'Unknown',
                             scores: [],
                             grade_count: 0
@@ -133,28 +135,28 @@ export function GradeAnalyticsWidget({ className = '' }: { className?: string })
                         if (isFinite(percentage)) {
                             acc[courseId].scores.push({
                                 score: percentage,
-                                date: grade.submission.graded_at || grade.submission.submitted_at
+                                date: grade.submission.graded_at || grade.submission.submitted_at || new Date().toISOString()
                             });
                             acc[courseId].grade_count++;
                         }
                     }
                     
                     return acc;
-                }, {} as Record<number, any>)
+                }, {} as Record<number, { id: number; name: string; course_code: string; scores: Array<{ date: string; score: number }>; grade_count: number }>)
             ).map(course => {
                 const scores = course.scores
-                    .filter((s: any) => s.date)
-                    .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                    .filter((s: { date: string; score: number }) => s.date)
+                    .sort((a: { date: string }, b: { date: string }) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 
                 const average = scores.length > 0 
-                    ? Number((scores.reduce((sum: number, s: any) => sum + s.score, 0) / scores.length).toFixed(1))
+                    ? Number((scores.reduce((sum: number, s: { score: number }) => sum + s.score, 0) / scores.length).toFixed(1))
                     : 0;
                 
                 // Calculate trend
                 let trend: 'improving' | 'declining' | 'stable' = 'stable';
                 if (scores.length >= 3) {
-                    const recent = scores.slice(-3).map((s: any) => s.score);
-                    const older = scores.slice(-6, -3).map((s: any) => s.score);
+                    const recent = scores.slice(-3).map((s: { score: number }) => s.score);
+                    const older = scores.slice(-6, -3).map((s: { score: number }) => s.score);
                     
                     if (older.length > 0) {
                         const recentAvg = recent.reduce((sum: number, score: number) => sum + score, 0) / recent.length;

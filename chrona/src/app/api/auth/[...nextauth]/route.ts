@@ -52,8 +52,12 @@ export const authOptions: NextAuthOptions = {
 /**
  * Refreshes the access token using the refresh token
  */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: { [key: string]: unknown; refreshToken?: string; expiresAt?: number }) {
   try {
+    if (!token.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
     const url = 'https://oauth2.googleapis.com/token';
 
     const response = await fetch(url, {
